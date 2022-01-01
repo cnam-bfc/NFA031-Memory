@@ -66,7 +66,7 @@ public class Programme {
                 // On ajoute le mot seulement si le mot n'est pas déjà contenu dans le tableau et si ce n'est pas une lettre seule
                 // (exemple: le mot "c" ne sera pas ajouté dans le tableau puisque c'est une lettre seule)
                 if (mot.length() > 1 && !estContenuDansTableau(mot, mots)) {
-                    mots = ajouterPlaceTableau(mots);
+                    mots = ajouterUnePlaceDansTableau(mots);
                     mots[mots.length - 1] = mot;
                 }
                 mot = "";
@@ -87,7 +87,7 @@ public class Programme {
     }
 
     // Retourne un tableau au contenu identique à celui entré en paramètres mais avec un emplacement vide en dernier index
-    static String[] ajouterPlaceTableau(String[] tableau) {
+    static String[] ajouterUnePlaceDansTableau(String[] tableau) {
         String[] result = new String[tableau.length + 1];
         for (int i = 0; i < tableau.length; i++) {
             result[i] = tableau[i];
