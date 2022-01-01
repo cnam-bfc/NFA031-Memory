@@ -4,12 +4,27 @@ import java.io.IOException;
 
 public class Programme {
 
+    static int TERMINAL_LENGTH = 100;
+    static int TERMINAL_HEIGHT = 10;
+
     public static void main(String[] args) {
         String[] mots = lireTexte(".\\src\\nfa031\\memory\\Ressources\\Extrait_texte.txt");
         for (String str : mots) {
             System.out.println(str);
         }
         System.out.println("Taille: " + mots.length);
+        effacerConsole();
+    }
+
+    // Efface le contenu de la console
+    // Source: https://stackoverflow.com/a/32295974
+    static void effacerConsole() {
+        // On utilise cette boucle pour afficher des lignes vides au cas où le terminal utilisé ne supporterai pas le code suivant cette boucle
+        for (int i = 0; i < TERMINAL_HEIGHT; i++) {
+            System.out.println();
+        }
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
     }
 
     // Retourne un tableau des mots d'un fichier texte
