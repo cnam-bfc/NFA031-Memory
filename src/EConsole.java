@@ -1,5 +1,3 @@
-package nfa031.memory;
-
 /* La classe Console fourni des méthodes permettant de lire des données au clavier
 Méthode lireString () --> Lecture d'une chaine
 Méthode lireFloat () --> Lecture d'une variable de type float
@@ -8,9 +6,7 @@ Méthode lireInt () --> Lecture d'une variable de type int
 Méthode lireLong () --> Lecture d'une variable de type long
 Méthode lireShort () --> Lecture d'une variable de type short
 Méthode lirebyte () --> Lecture d'une variable de type byte
-Méthode lireChar () --> Lecture d'une variable de type char
-
- */
+Méthode lireChar () --> Lecture d'une variable de type char */
 import java.io.*;
 
 public class EConsole {

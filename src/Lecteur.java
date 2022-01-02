@@ -1,4 +1,3 @@
-package nfa031.memory;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -6,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class Lecteur {
+
     public static String LireTexte(String filename) throws FileNotFoundException, IOException {
         FileReader fichierTexte = new FileReader(filename);
         String texte = "";

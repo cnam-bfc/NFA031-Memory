@@ -1,38 +1,65 @@
-package nfa031.memory;
 
 import java.io.IOException;
 
 public class Programme {
 
-    static int TERMINAL_LENGTH = 100;
-    static int TERMINAL_HEIGHT = 10;
-
     public static void main(String[] args) {
-        String[] mots = lireTexte(".\\src\\nfa031\\memory\\Ressources\\Extrait_texte.txt");
+        String[] mots = readFile(".\\src\\nfa031\\memory\\Ressources\\Extrait_texte.txt");
         for (String str : mots) {
             System.out.println(str);
         }
         System.out.println("Taille: " + mots.length);
-        effacerConsole();
+        clearConsole();
+        showBoundingBoxWithContent("");
+    }
+
+    // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre
+    // Source des caractères graphiques: https://en.wikipedia.org/wiki/Box-drawing_character#Box_Drawing
+    static void showBoundingBoxWithContent(String title, String... lines) {
+        String[] tableauTemp = enlargeTable(lines);
+        tableauTemp[tableauTemp.length - 1] = "  " + title + "  ";
+        int longueur = getMaximumLength(tableauTemp);
+        // Première ligne
+        System.out.print("/");
+        if (title.equals("")) {
+            for (int i = 1; i < longueur - 1; i++) {
+                System.out.print("-");
+            }
+        } else {
+            for (int i = 1; i < longueur - 1; i++) {
+                System.out.print("-");
+            }
+            for (int i = 1; i < longueur - 1; i++) {
+                System.out.print("-");
+            }
+        }
+        System.out.print("\\");
+    }
+
+    // Retourne la longueur la plus meximal des chaines de caractères contenu dans le tableau
+    static int getMaximumLength(String[] table) {
+        int max = 0;
+        for (String str : table) {
+            if (str.length() > max) {
+                max = str.length();
+            }
+        }
+        return max;
     }
 
     // Efface le contenu de la console
     // Source: https://stackoverflow.com/a/32295974
-    static void effacerConsole() {
-        // On utilise cette boucle pour afficher des lignes vides au cas où le terminal utilisé ne supporterai pas le code suivant cette boucle
-        for (int i = 0; i < TERMINAL_HEIGHT; i++) {
-            System.out.println();
-        }
+    static void clearConsole() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
 
     // Retourne un tableau des mots d'un fichier texte
     // Retourne un tableau de 0 valeurs si une exception est levée
-    static String[] lireTexte(String cheminDuFichier) {
+    static String[] readFile(String filePath) {
         try {
-            String texte = Lecteur.LireTexte(cheminDuFichier);
-            return transformerTexteEnMots(texte);
+            String texte = Lecteur.LireTexte(filePath);
+            return formatTextToWords(texte);
         } catch (IOException err1) {
             System.out.println("Erreur lors de la lecture du fichier");
             // On retourne un tableau vide puisqu'une exception a été levée
@@ -43,15 +70,15 @@ public class Programme {
     // Retourne un tableau de mots à partir d'une chaine de caractères
     // sans doublons, sans ponctuation, sans espaces et sans lettres seules
     // (exemple pour "c'était", seulement "était" est ajouté dans le tableau)
-    static String[] transformerTexteEnMots(String texte) {
+    static String[] formatTextToWords(String text) {
         String[] mots = new String[0];
         // On met le texte en minuscules
-        texte = texte.toLowerCase();
+        text = text.toLowerCase();
         // On concatène les caractères les uns à la suite des autre dans cette chaine de caractères
         String mot = "";
         // On parcours le texte caractère par caractère
-        for (int i = 0; i < texte.length(); i++) {
-            char c = texte.charAt(i);
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
             // On enlève les accents des lettres et on concatène le caractère seulement si c'est une lettre
             // On traite aussi les 2 caractères spéciaux "æ" et "œ"
             // Source: https://fr.wikipedia.org/wiki/Diacritiques_utilis%C3%A9s_en_fran%C3%A7ais#:~:text=%C2%AB%20D%C3%A8s%20lors%20les%20voyelles%20et,%2D%20%C3%BC%20%2D%20%C3%BF%20%2D%20%C3%A7.
@@ -80,8 +107,8 @@ public class Programme {
             } else {
                 // On ajoute le mot seulement si le mot n'est pas déjà contenu dans le tableau et si ce n'est pas une lettre seule
                 // (exemple: le mot "c" ne sera pas ajouté dans le tableau puisque c'est une lettre seule)
-                if (mot.length() > 1 && !estContenuDansTableau(mot, mots)) {
-                    mots = ajouterUnePlaceDansTableau(mots);
+                if (mot.length() > 1 && !isIncludedInTable(mot, mots)) {
+                    mots = enlargeTable(mots);
                     mots[mots.length - 1] = mot;
                 }
                 mot = "";
@@ -92,8 +119,8 @@ public class Programme {
 
     // Retourne vrai si la chaine de caractères est contenu dans le tableau
     // Retourne faux si elle n'y est pas
-    static boolean estContenuDansTableau(String search, String[] tableau) {
-        for (String str : tableau) {
+    static boolean isIncludedInTable(String search, String[] table) {
+        for (String str : table) {
             if (str.equals(search)) {
                 return true;
             }
@@ -102,7 +129,7 @@ public class Programme {
     }
 
     // Retourne un tableau au contenu identique à celui entré en paramètres mais avec un emplacement vide en dernier index
-    static String[] ajouterUnePlaceDansTableau(String[] tableau) {
+    static String[] enlargeTable(String[] tableau) {
         String[] result = new String[tableau.length + 1];
         for (int i = 0; i < tableau.length; i++) {
             result[i] = tableau[i];
