@@ -4,13 +4,16 @@ import java.io.IOException;
 public class Programme {
 
     public static void main(String[] args) {
-        String[] mots = readFile(".\\src\\nfa031\\memory\\Ressources\\Extrait_texte.txt");
+        String[] mots = readFile(".\\src\\Extrait_texte.txt");
         for (String str : mots) {
             System.out.println(str);
         }
         System.out.println("Taille: " + mots.length);
         clearConsole();
-        showBoundingBoxWithContent("");
+        String[] test = new String[1];
+        test[0] = "kfgjsjhgjkfkjlqsfjhksgdjsfejlk";
+        showBoundingBoxWithContent("", test);
+        showBoundingBoxWithContent("azerty", test);
     }
 
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre
@@ -26,14 +29,16 @@ public class Programme {
                 System.out.print("-");
             }
         } else {
-            for (int i = 1; i < longueur - 1; i++) {
+            for (int i = 1; i < longueur / 2 - 1; i++) {
                 System.out.print("-");
             }
-            for (int i = 1; i < longueur - 1; i++) {
+            System.out.print(title);
+            for (int i = 1; i < longueur / 2 - 1; i++) {
                 System.out.print("-");
             }
         }
         System.out.print("\\");
+        System.out.println();
     }
 
     // Retourne la longueur la plus meximal des chaines de caractères contenu dans le tableau
@@ -129,10 +134,10 @@ public class Programme {
     }
 
     // Retourne un tableau au contenu identique à celui entré en paramètres mais avec un emplacement vide en dernier index
-    static String[] enlargeTable(String[] tableau) {
-        String[] result = new String[tableau.length + 1];
-        for (int i = 0; i < tableau.length; i++) {
-            result[i] = tableau[i];
+    static String[] enlargeTable(String[] table) {
+        String[] result = new String[table.length + 1];
+        for (int i = 0; i < table.length; i++) {
+            result[i] = table[i];
         }
         return result;
     }
