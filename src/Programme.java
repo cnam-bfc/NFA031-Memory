@@ -3,6 +3,13 @@ import java.io.IOException;
 
 public class Programme {
 
+    static final String MENU_TOP_LEFT = "/";
+    static final String MENU_TOP_RIGHT = "\\";
+    static final String MENU_BOTTOM_LEFT = "\\";
+    static final String MENU_BOTTOM_RIGHT = "/";
+    static final String MENU_VERTICAL = "|";
+    static final String MENU_HORIZONTAL = "-";
+
     public static void main(String[] args) {
         String[] mots = readFile(".\\src\\Extrait_texte.txt");
         for (String str : mots) {
@@ -10,35 +17,64 @@ public class Programme {
         }
         System.out.println("Taille: " + mots.length);
         clearConsole();
-        String[] test = new String[1];
-        test[0] = "kfgjsjhgjkfkjlqsfjhksgdjsfejlk";
+        showBoundingBoxWithContent("");
+        showBoundingBoxWithContent("test");
+        showBoundingBoxWithContent("t");
+        String[] test = new String[2];
+        test[0] = "qwertyazerty";
+        test[1] = "querty";
         showBoundingBoxWithContent("", test);
         showBoundingBoxWithContent("azerty", test);
+        showBoundingBoxWithContent("azerty2", test);
+        test[0] = "qwertyazert";
+        test[1] = "querty";
+        showBoundingBoxWithContent("", test);
+        showBoundingBoxWithContent("azerty", test);
+        showBoundingBoxWithContent("azerty2", test);
     }
 
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre
     // Source des caractères graphiques: https://en.wikipedia.org/wiki/Box-drawing_character#Box_Drawing
     static void showBoundingBoxWithContent(String title, String... lines) {
         String[] tableauTemp = enlargeTable(lines);
-        tableauTemp[tableauTemp.length - 1] = "  " + title + "  ";
+        tableauTemp[tableauTemp.length - 1] = " " + title + " ";
         int longueur = getMaximumLength(tableauTemp);
         // Première ligne
-        System.out.print("/");
+        System.out.print(MENU_TOP_LEFT);
         if (title.equals("")) {
-            for (int i = 1; i < longueur - 1; i++) {
-                System.out.print("-");
+            for (int i = 0; i < longueur + 2; i++) {
+                System.out.print(MENU_HORIZONTAL);
             }
         } else {
-            for (int i = 1; i < longueur / 2 - 1; i++) {
-                System.out.print("-");
+            int longueurMoitie = (longueur + 2) / 2 - (title.length() + 2) / 2;
+            for (int i = 0; i < longueurMoitie + (longueur + 2) % 2 - (title.length() + 2) % 2; i++) {
+                System.out.print(MENU_HORIZONTAL);
             }
+            System.out.print(" ");
             System.out.print(title);
-            for (int i = 1; i < longueur / 2 - 1; i++) {
-                System.out.print("-");
+            System.out.print(" ");
+            for (int i = 0; i < longueurMoitie; i++) {
+                System.out.print(MENU_HORIZONTAL);
             }
         }
-        System.out.print("\\");
-        System.out.println();
+        System.out.println(MENU_TOP_RIGHT);
+        // Lignes au milieu
+        for (String str : lines) {
+            System.out.print(MENU_VERTICAL);
+            System.out.print(" ");
+            System.out.print(str);
+            for (int i = 0; i < longueur - str.length(); i++) {
+                System.out.print(" ");
+            }
+            System.out.print(" ");
+            System.out.println(MENU_VERTICAL);
+        }
+        // Dernière ligne
+        System.out.print(MENU_BOTTOM_LEFT);
+        for (int i = 0; i < longueur + 2; i++) {
+            System.out.print(MENU_HORIZONTAL);
+        }
+        System.out.println(MENU_BOTTOM_RIGHT);
     }
 
     // Retourne la longueur la plus meximal des chaines de caractères contenu dans le tableau
@@ -119,7 +155,6 @@ public class Programme {
                 mot = "";
             }
         }
-        
         return mots;
     }
 
