@@ -1,5 +1,8 @@
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Programme {
 
@@ -16,25 +19,9 @@ public class Programme {
             System.out.println(str);
         }
         System.out.println("Taille: " + mots.length);
-        clearConsole();
-        showBoundingBoxWithContent("");
-        showBoundingBoxWithContent("test");
-        showBoundingBoxWithContent("t");
-        String[] test = new String[2];
-        test[0] = "qwertyazerty";
-        test[1] = "querty";
-        showBoundingBoxWithContent("", test);
-        showBoundingBoxWithContent("azerty", test);
-        showBoundingBoxWithContent("azerty2", test);
-        test[0] = "qwertyazert";
-        test[1] = "querty";
-        showBoundingBoxWithContent("", test);
-        showBoundingBoxWithContent("azerty", test);
-        showBoundingBoxWithContent("azerty2", test);
     }
 
-    // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre
-    // Source des caractères graphiques: https://en.wikipedia.org/wiki/Box-drawing_character#Box_Drawing
+    // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
     static void showBoundingBoxWithContent(String title, String... lines) {
         String[] tableauTemp = enlargeTable(lines);
         tableauTemp[tableauTemp.length - 1] = " " + title + " ";
@@ -93,6 +80,17 @@ public class Programme {
     static void clearConsole() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
+    }
+
+    // Retourne vrai si le fichier existe
+    // Retourne faux si il n'existe pas
+    static boolean fileExists(String filePath) {
+        try {
+            Lecteur.LireTexte(filePath);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     // Retourne un tableau des mots d'un fichier texte
