@@ -14,11 +14,59 @@ public class Programme {
     static final String MENU_HORIZONTAL = "-";
 
     public static void main(String[] args) {
-        String[] mots = readFile(".\\src\\Extrait_texte.txt");
-        for (String str : mots) {
-            System.out.println(str);
+        startGame();
+    }
+
+    // Démarre le jeu
+    static void startGame() {
+        showLoadingScreen();
+        showMainMenu();
+    }
+
+    // Affiche un faux écran de chargement
+    static void showLoadingScreen() {
+        for (int i = 0; i < 24; i++) {
+            clearConsole();
+            String progressBar = "[";
+            for (int j = 0; j < i; j++) {
+                progressBar += "=";
+            }
+            progressBar += "*";
+            for (int j = 24; j > i; j--) {
+                progressBar += " ";
+            }
+            progressBar += "]";
+            showBoundingBoxWithContent("", "", "      Jeux de Mémoire      ", "", progressBar, "");
+            sleep(generateRandomInt(0, 1000));
         }
-        System.out.println("Taille: " + mots.length);
+    }
+
+    // Affiche le menu principal
+    static void showMainMenu() {
+        showMenu("Menu principal", "", "Jouer", "Statistiques", "Quitter");
+    }
+
+    // Affiche un menu à l'utilisateur avec un titre, une sous-titre et les choises passés en paramètre
+    // Retourne le numéro du choix de l'utilisateur
+    static int showMenu(String title, String subTitle, String... choices) {
+        try {
+            clearConsole();
+            String[] lines = new String[0];
+            if (!subTitle.equals("")) {
+                lines = enlargeTable(lines);
+                lines[lines.length - 1] = subTitle;
+            }
+            for (int i = 0; i < choices.length; i++) {
+                String choice = choices[i];
+                lines = enlargeTable(lines);
+                lines[lines.length - 1] = i + 1 + ". " + choice;
+            }
+            showBoundingBoxWithContent(title, lines);
+            System.out.print("Choix > ");
+            return EConsole.lireInt();
+        } catch (IOException | NumberFormatException ex) {
+            return 0;
+        }
     }
 
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
@@ -82,13 +130,28 @@ public class Programme {
         System.out.flush();
     }
 
+    // Cherche le fichier dans plusieurs dossiers et le lit si il est trouvé
+    // Retourne un tableau des mots du fichier
+    // Retourne un tableau de 0 valeurs si aucun fichiers n'est trouvé
+    static String[] readText(String fileName) {
+        String[] folders = {".\\", ".\\src\\", ".\\textes\\"};
+        for (String folder : folders) {
+            if (fileExists(folder + fileName + ".txt")) {
+                return readFile(folder + fileName + ".txt");
+            }
+        }
+        return new String[0];
+    }
+
     // Retourne vrai si le fichier existe
     // Retourne faux si il n'existe pas
     static boolean fileExists(String filePath) {
         try {
             Lecteur.LireTexte(filePath);
             return true;
-        } catch (Exception ex) {
+        } catch (FileNotFoundException ex) {
+            return false;
+        } catch (IOException ex) {
             return false;
         }
     }
@@ -174,5 +237,20 @@ public class Programme {
             result[i] = table[i];
         }
         return result;
+    }
+
+    // Retourne un entier pseudo-aléatoirement entre min et max
+    // Source: https://stackoverflow.com/a/363732
+    static int generateRandomInt(int min, int max) {
+        return min + (int) (Math.random() * (max - min + 1));
+    }
+
+    // Met le programme en pause pendant x ms
+    static void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
