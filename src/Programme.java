@@ -86,8 +86,7 @@ public class Programme {
     }
 
     // Affiche le menu de sélection des jeux
-    // Retourne vrai si tout s'est bien passé
-    static boolean showGameMenu(String[] stats) {
+    static void showGameMenu(String[] stats) {
         boolean showAgain = false;
         do {
             int menuCode = showMenu("Choix du jeu", "", "Série de mots", "Série de nombres", "Liste de paires de mots", "Retour");
@@ -98,12 +97,8 @@ public class Programme {
                     showAgain = !launchSerieDeNombresGame(stats);
                 case 3 ->
                     showAgain = !launchPairesDeMotsGame(stats);
-                case 4 -> {
-                    return false;
-                }
             }
         } while (showAgain);
-        return true;
     }
 
     // Lance le jeu de série de mots
