@@ -94,13 +94,11 @@ public class Programme {
 
         // Première ligne
         System.out.print("/");
-        if (title.equals("")) {
-            for (int i = 0; i < minLength; i++) {
-                System.out.print("-");
-            }
-        } else {
-            System.out.print(getCenteredText(title, '-', ' ', minLength));
+        char separator = '-';
+        if (!title.equals("")) {
+            separator = ' ';
         }
+        System.out.print(getCenteredText(title, '-', separator, minLength));
         System.out.println("\\");
 
         // Bourage avec des lignes vide pour qu'il y ai au moins minHeight lignes dans la boite
@@ -127,9 +125,7 @@ public class Programme {
 
         // Dernière ligne
         System.out.print("\\");
-        for (int i = 0; i < minLength; i++) {
-            System.out.print("-");
-        }
+        System.out.print(getCenteredText("", '-', minLength));
         System.out.println("/");
     }
 
