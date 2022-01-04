@@ -12,9 +12,15 @@ public class Programme {
         startGame();
     }
 
+    // TODO Supprimer cette méthode à la fin du développement
+    static void devMessage(String feature) {
+        showMessage("", "En développement...");
+    }
+
     // Démarre le jeu
     static void startGame() {
-        showLoadingScreen();
+        // TODO Augmenter cette valeur
+        showLoadingScreen(100);
         String[] stats = initStats();
         showMainMenu(stats);
     }
@@ -23,8 +29,12 @@ public class Programme {
         return new String[0];
     }
 
-    // Affiche un faux écran de chargement
-    static void showLoadingScreen() {
+    // Affiche un faux écran de chargement, plus speed est proche de 0 plus le chargement est rapide
+    static void showLoadingScreen(int speed) {
+        if (speed <= 0) {
+            showErrorMessage("Écran de chargement", "", "Speed doit être supérieur à 0");
+            return;
+        }
         for (int i = 0; i < 24; i++) {
             clearConsole();
             String progressBar = "[";
@@ -37,7 +47,7 @@ public class Programme {
             }
             progressBar += "]";
             showBoundingBoxWithContent("", GAME_NAME, "", "", "", "Chargement...", "", progressBar);
-            sleep(generateRandomInt(100, 200));
+            sleep(generateRandomInt(0, speed));
         }
     }
 
@@ -67,35 +77,54 @@ public class Programme {
 
     // Affiche le menu des paramètres
     static void showSettingsMenu(String[] stats) {
-        try {
-            clearConsole();
-            showBoundingBoxWithContent("Paramètres", "En développement...", "", "Appuyez sur Entrée pour continuer...");
-            EConsole.lireString();
-        } catch (IOException ex) {
-            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        devMessage("Paramètres");
     }
 
     // Affiche le menu des statistiques
     static void showStatsMenu(String[] stats) {
-        try {
-            clearConsole();
-            showBoundingBoxWithContent("Statistiques", "En développement...", "", "Appuyez sur Entrée pour continuer...");
-            EConsole.lireString();
-        } catch (IOException ex) {
-            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        devMessage("Statistiques");
     }
 
     // Affiche le menu de sélection des jeux
-    static void showGameMenu(String[] stats) {
-        try {
-            clearConsole();
-            showBoundingBoxWithContent("Jouer", "En développement...", "", "Appuyez sur Entrée pour continuer...");
-            EConsole.lireString();
-        } catch (IOException ex) {
-            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    // Retourne vrai si tout s'est bien passé
+    static boolean showGameMenu(String[] stats) {
+        boolean showAgain = false;
+        do {
+            int menuCode = showMenu("Choix du jeu", "", "Série de mots", "Série de nombres", "Liste de paires de mots", "Retour");
+            switch (menuCode) {
+                case 1 ->
+                    showAgain = !launchSerieDeMotsGame(stats);
+                case 2 ->
+                    showAgain = !launchSerieDeNombresGame(stats);
+                case 3 ->
+                    showAgain = !launchPairesDeMotsGame(stats);
+                case 4 -> {
+                    return false;
+                }
+            }
+        } while (showAgain);
+        return true;
+    }
+
+    // Lance le jeu de série de mots
+    // Retourne vrai si tout s'est bien passé
+    static boolean launchSerieDeMotsGame(String[] stats) {
+        devMessage("Série de mots");
+        return false;
+    }
+
+    // Lance le jeu de série de nombres
+    // Retourne vrai si tout s'est bien passé
+    static boolean launchSerieDeNombresGame(String[] stats) {
+        devMessage("Série de nombres");
+        return false;
+    }
+
+    // Lance le jeu de paires de mots
+    // Retourne vrai si tout s'est bien passé
+    static boolean launchPairesDeMotsGame(String[] stats) {
+        devMessage("Paires de mots");
+        return false;
     }
 
     // Affiche un menu à l'utilisateur avec un titre, une sous-titre et les choises passés en paramètre
@@ -129,28 +158,25 @@ public class Programme {
 
     // Affiche un message d'avertissement à l'utilisateur
     static void showWarningMessage(String... message) {
-        try {
-            clearConsole();
-            message = enlargeTable(message);
-            message[message.length - 1] = "";
-            message = enlargeTable(message);
-            message[message.length - 1] = "Appuyez sur Entrée pour continuer...";
-            showBoundingBoxWithContent("ATTENTION", message);
-            EConsole.lireString();
-        } catch (IOException ex) {
-            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        showMessage("ATTENTION", message);
     }
 
     // Affiche un message d'erreur à l'utilisateur
     static void showErrorMessage(String... message) {
+        showMessage("ERREUR", message);
+    }
+
+    // Affiche un message à l'utilisateur
+    static void showMessage(String title, String... message) {
         try {
             clearConsole();
             message = enlargeTable(message);
             message[message.length - 1] = "";
             message = enlargeTable(message);
+            message[message.length - 1] = "";
+            message = enlargeTable(message);
             message[message.length - 1] = "Appuyez sur Entrée pour continuer...";
-            showBoundingBoxWithContent("ERREUR", message);
+            showBoundingBoxWithContent(title, message);
             EConsole.lireString();
         } catch (IOException ex) {
             Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
