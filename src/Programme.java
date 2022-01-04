@@ -69,11 +69,13 @@ public class Programme {
 
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
     static void showBoundingBoxWithContent(String title, String... lines) {
+        // On défini la longueur par défaut si aucune n'est spécifié
         showBoundingBoxWithContent(title, 100, lines);
     }
 
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
     static void showBoundingBoxWithContent(String title, int minLength, String... lines) {
+        // On défini la hauteur par défaut si aucune n'est spécifié
         showBoundingBoxWithContent(title, minLength, 15, lines);
     }
 
