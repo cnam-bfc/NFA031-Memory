@@ -45,22 +45,35 @@ public class Programme {
     static void showMainMenu(String[] stats) {
         int menuCode;
         do {
-            menuCode = showMenu("Menu principal", "", "Jouer", "Statistiques", "Quitter");
+            menuCode = showMenu("Menu principal", "", "Jouer", "Statistiques", "Paramètres", "Quitter");
             switch (menuCode) {
                 case 1 ->
                     showGameMenu(stats);
                 case 2 ->
                     showStatsMenu(stats);
                 case 3 ->
+                    showSettingsMenu(stats);
+                case 4 ->
                     showQuitMenu(stats);
             }
-        } while (menuCode != 3);
+        } while (menuCode != 4);
     }
 
     // Affiche le menu des statistiques
     static void showQuitMenu(String[] stats) {
         clearConsole();
         showBoundingBoxWithContent(GAME_NAME, "À bientôt...");
+    }
+
+    // Affiche le menu des paramètres
+    static void showSettingsMenu(String[] stats) {
+        try {
+            clearConsole();
+            showBoundingBoxWithContent("Paramètres", "En développement...", "", "Appuyez sur Entrée pour continuer...");
+            EConsole.lireString();
+        } catch (IOException ex) {
+            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     // Affiche le menu des statistiques
