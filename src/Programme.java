@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 
 public class Programme {
 
+    static String GAME_NAME = "Jeux de Mémoire";
+
     public static void main(String[] args) {
         startGame();
     }
@@ -14,7 +16,7 @@ public class Programme {
     static void startGame() {
         showLoadingScreen();
         String[] stats = initStats();
-        showMainMenu();
+        showMainMenu(stats);
     }
 
     static String[] initStats() {
@@ -34,19 +36,59 @@ public class Programme {
                 progressBar += " ";
             }
             progressBar += "]";
-            showBoundingBoxWithContent("", "Jeux de Mémoire", "", "", "", "Chargement...", "", progressBar);
+            showBoundingBoxWithContent("", GAME_NAME, "", "", "", "Chargement...", "", progressBar);
             sleep(generateRandomInt(100, 200));
         }
     }
 
     // Affiche le menu principal
-    static void showMainMenu() {
-        showMenu("Menu principal", "", "Jouer", "Statistiques", "Quitter");
+    static void showMainMenu(String[] stats) {
+        int menuCode;
+        do {
+            menuCode = showMenu("Menu principal", "", "Jouer", "Statistiques", "Quitter");
+            switch (menuCode) {
+                case 1 ->
+                    showGameMenu(stats);
+                case 2 ->
+                    showStatsMenu(stats);
+                case 3 ->
+                    showQuitMenu(stats);
+            }
+        } while (menuCode != 3);
+    }
+
+    // Affiche le menu des statistiques
+    static void showQuitMenu(String[] stats) {
+        clearConsole();
+        showBoundingBoxWithContent(GAME_NAME, "À bientôt...");
+    }
+
+    // Affiche le menu des statistiques
+    static void showStatsMenu(String[] stats) {
+        try {
+            clearConsole();
+            showBoundingBoxWithContent("Statistiques", "En développement...", "", "Appuyez sur Entrée pour continuer...");
+            EConsole.lireString();
+        } catch (IOException ex) {
+            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    // Affiche le menu de sélection des jeux
+    static void showGameMenu(String[] stats) {
+        try {
+            clearConsole();
+            showBoundingBoxWithContent("Jouer", "En développement...", "", "Appuyez sur Entrée pour continuer...");
+            EConsole.lireString();
+        } catch (IOException ex) {
+            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     // Affiche un menu à l'utilisateur avec un titre, une sous-titre et les choises passés en paramètre
     // Retourne le numéro du choix de l'utilisateur
     static int showMenu(String title, String subTitle, String... choices) {
+        int item = 0;
         try {
             clearConsole();
             String[] lines = new String[0];
@@ -61,9 +103,44 @@ public class Programme {
             }
             showBoundingBoxWithContent(title, lines);
             System.out.print("Choix > ");
-            return EConsole.lireInt();
+            item = EConsole.lireInt();
         } catch (IOException | NumberFormatException ex) {
-            return 0;
+
+        }
+        if (item < 1 || item > choices.length) {
+            showWarningMessage("Veuillez saisir un entier entre 1 et " + choices.length);
+            item = showMenu(title, subTitle, choices);
+        }
+        return item;
+    }
+
+    // Affiche un message d'avertissement à l'utilisateur
+    static void showWarningMessage(String... message) {
+        try {
+            clearConsole();
+            message = enlargeTable(message);
+            message[message.length - 1] = "";
+            message = enlargeTable(message);
+            message[message.length - 1] = "Appuyez sur Entrée pour continuer...";
+            showBoundingBoxWithContent("ATTENTION", message);
+            EConsole.lireString();
+        } catch (IOException ex) {
+            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    // Affiche un message d'erreur à l'utilisateur
+    static void showErrorMessage(String... message) {
+        try {
+            clearConsole();
+            message = enlargeTable(message);
+            message[message.length - 1] = "";
+            message = enlargeTable(message);
+            message[message.length - 1] = "Appuyez sur Entrée pour continuer...";
+            showBoundingBoxWithContent("ERREUR", message);
+            EConsole.lireString();
+        } catch (IOException ex) {
+            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -220,7 +297,7 @@ public class Programme {
             String texte = Lecteur.LireTexte(filePath);
             return formatTextToWords(texte);
         } catch (IOException err1) {
-            System.out.println("Erreur lors de la lecture du fichier");
+            showErrorMessage("Erreur lors de la lecture du fichier,", "Fichier: " + filePath);
             // On retourne un tableau vide puisqu'une exception a été levée
             return new String[0];
         }
