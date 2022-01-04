@@ -6,13 +6,6 @@ import java.util.logging.Logger;
 
 public class Programme {
 
-    static final String MENU_TOP_LEFT = "/";
-    static final String MENU_TOP_RIGHT = "\\";
-    static final String MENU_BOTTOM_LEFT = "\\";
-    static final String MENU_BOTTOM_RIGHT = "/";
-    static final String MENU_VERTICAL = "|";
-    static final String MENU_HORIZONTAL = "-";
-
     public static void main(String[] args) {
         startGame();
     }
@@ -20,7 +13,12 @@ public class Programme {
     // Démarre le jeu
     static void startGame() {
         showLoadingScreen();
+        String[] stats = initStats();
         showMainMenu();
+    }
+
+    static String[] initStats() {
+        return new String[0];
     }
 
     // Affiche un faux écran de chargement
@@ -36,8 +34,8 @@ public class Programme {
                 progressBar += " ";
             }
             progressBar += "]";
-            showBoundingBoxWithContent("", "", "      Jeux de Mémoire      ", "", progressBar, "");
-            sleep(generateRandomInt(0, 1000));
+            showBoundingBoxWithContent("", "Jeux de Mémoire", "", "", "", "Chargement...", "", progressBar);
+            sleep(generateRandomInt(100, 200));
         }
     }
 
@@ -71,55 +69,114 @@ public class Programme {
 
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
     static void showBoundingBoxWithContent(String title, String... lines) {
+        showBoundingBoxWithContent(title, 100, lines);
+    }
+
+    // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
+    static void showBoundingBoxWithContent(String title, int minLength, String... lines) {
+        showBoundingBoxWithContent(title, minLength, 15, lines);
+    }
+
+    // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
+    static void showBoundingBoxWithContent(String title, int minLength, int minHeight, String... lines) {
         String[] tableauTemp = enlargeTable(lines);
+        // " " Pour avoir au moins un tiret (spacer) de chaque côté du titre si il est le plus grand par rapport aux Strings de lines
+        // car les spacer ne sont pas forcément retourné dans la méthode getCenteredText() qui est utilisé plus tard dans cette méthode
         tableauTemp[tableauTemp.length - 1] = " " + title + " ";
-        int longueur = getMaximumLength(tableauTemp);
+        int maxLength = getMaximumLength(tableauTemp) + 2;
+        if (maxLength > minLength) {
+            minLength = maxLength;
+        }
+        int maxHeight = lines.length;
+        if (maxHeight > minHeight) {
+            minHeight = maxHeight;
+        }
+
         // Première ligne
-        System.out.print(MENU_TOP_LEFT);
+        System.out.print("/");
         if (title.equals("")) {
-            for (int i = 0; i < longueur + 2; i++) {
-                System.out.print(MENU_HORIZONTAL);
+            for (int i = 0; i < minLength; i++) {
+                System.out.print("-");
             }
         } else {
-            int longueurMoitie = (longueur + 2) / 2 - (title.length() + 2) / 2;
-            for (int i = 0; i < longueurMoitie + (longueur + 2) % 2 - (title.length() + 2) % 2; i++) {
-                System.out.print(MENU_HORIZONTAL);
-            }
-            System.out.print(" ");
-            System.out.print(title);
-            System.out.print(" ");
-            for (int i = 0; i < longueurMoitie; i++) {
-                System.out.print(MENU_HORIZONTAL);
-            }
+            System.out.print(getCenteredText(title, '-', ' ', minLength));
         }
-        System.out.println(MENU_TOP_RIGHT);
+        System.out.println("\\");
+
+        // Bourage avec des lignes vide pour qu'il y ai au moins minHeight lignes dans la boite
+        int halfMinHeight = minHeight / 2 - lines.length / 2;
+        for (int i = 0; i < halfMinHeight; i++) {
+            System.out.print("|");
+            System.out.print(getCenteredText("", ' ', ' ', minLength));
+            System.out.println("|");
+        }
+
         // Lignes au milieu
         for (String str : lines) {
-            System.out.print(MENU_VERTICAL);
-            System.out.print(" ");
-            System.out.print(str);
-            for (int i = 0; i < longueur - str.length(); i++) {
-                System.out.print(" ");
-            }
-            System.out.print(" ");
-            System.out.println(MENU_VERTICAL);
+            System.out.print("|");
+            System.out.print(getCenteredText(str, ' ', ' ', minLength));
+            System.out.println("|");
         }
+
+        // Bourage avec des lignes vide + une si la division de halfMinHeight à un reste
+        for (int i = 0; i < halfMinHeight + minHeight % 2 - lines.length % 2; i++) {
+            System.out.print("|");
+            System.out.print(getCenteredText("", ' ', ' ', minLength));
+            System.out.println("|");
+        }
+
         // Dernière ligne
-        System.out.print(MENU_BOTTOM_LEFT);
-        for (int i = 0; i < longueur + 2; i++) {
-            System.out.print(MENU_HORIZONTAL);
+        System.out.print("\\");
+        for (int i = 0; i < minLength; i++) {
+            System.out.print("-");
         }
-        System.out.println(MENU_BOTTOM_RIGHT);
+        System.out.println("/");
+    }
+
+    // Retourne la chaine de caractères passé en paramètre centré avec des caractères passé en paramètre
+    // Au moins un spacer est retourné de chaque côté du text
+    static String getCenteredText(String text, char spacer, int length) {
+        return getCenteredText(text, spacer, spacer, length);
+    }
+
+    // Retourne la chaine de caractères passé en paramètre centré avec des caractères passé en paramètre
+    // Les spacer ne sont pas forcément retournés mais separator est retourné 1 fois de chaque côté du text
+    static String getCenteredText(String text, char spacer, char separator, int length) {
+        String result = "";
+        // Longueur du text + 2 pour les 2 separator
+        int minimumLength = text.length() + 2;
+        if (minimumLength > length) {
+            length = minimumLength;
+        }
+
+        // Moitié de la longeur disponible - Moitié de la longueur du texte (text + les 2 separator) obligatoire à retourner
+        int halfLength = length / 2 - (text.length() + 2) / 2;
+        for (int i = 0; i < halfLength; i++) {
+            result += spacer;
+        }
+
+        result += separator;
+        result += text;
+        result += separator;
+
+        // En plus des spacer à imprimer ou pas on en imprime un de plus si les 2 divisions au dessus ont un reste
+        for (int i = 0; i < halfLength + length % 2 - (text.length() + 2) % 2; i++) {
+            result += spacer;
+        }
+
+        return result;
     }
 
     // Retourne la longueur la plus meximal des chaines de caractères contenu dans le tableau
     static int getMaximumLength(String[] table) {
         int max = 0;
+
         for (String str : table) {
             if (str.length() > max) {
                 max = str.length();
             }
         }
+
         return max;
     }
 
@@ -135,11 +192,13 @@ public class Programme {
     // Retourne un tableau de 0 valeurs si aucun fichiers n'est trouvé
     static String[] readText(String fileName) {
         String[] folders = {".\\", ".\\src\\", ".\\textes\\"};
+
         for (String folder : folders) {
             if (fileExists(folder + fileName + ".txt")) {
                 return readFile(folder + fileName + ".txt");
             }
         }
+
         return new String[0];
     }
 
@@ -178,12 +237,12 @@ public class Programme {
         text = text.toLowerCase();
         // On concatène les caractères les uns à la suite des autre dans cette chaine de caractères
         String mot = "";
+
         // On parcours le texte caractère par caractère
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
             // On enlève les accents des lettres et on concatène le caractère seulement si c'est une lettre
             // On traite aussi les 2 caractères spéciaux "æ" et "œ"
-            // Source: https://fr.wikipedia.org/wiki/Diacritiques_utilis%C3%A9s_en_fran%C3%A7ais#:~:text=%C2%AB%20D%C3%A8s%20lors%20les%20voyelles%20et,%2D%20%C3%BC%20%2D%20%C3%BF%20%2D%20%C3%A7.
             switch (c) {
                 case 'à', 'â', 'ä' ->
                     c = 'a';
@@ -200,6 +259,7 @@ public class Programme {
                 case 'ç' ->
                     c = 'c';
             }
+
             if (c >= 'a' && c <= 'z') {
                 mot += c;
             } else if (c == 'æ') {
@@ -216,6 +276,7 @@ public class Programme {
                 mot = "";
             }
         }
+
         return mots;
     }
 
@@ -227,19 +288,23 @@ public class Programme {
                 return true;
             }
         }
+
         return false;
     }
 
     // Retourne un tableau au contenu identique à celui entré en paramètres mais avec un emplacement vide en dernier index
+    @SuppressWarnings("ManualArrayToCollectionCopy")
     static String[] enlargeTable(String[] table) {
         String[] result = new String[table.length + 1];
+
         for (int i = 0; i < table.length; i++) {
             result[i] = table[i];
         }
+
         return result;
     }
 
-    // Retourne un entier pseudo-aléatoirement entre min et max
+    // Retourne un entier pseudo-aléatoirement entre min (inclus) et max (inclus)
     // Source: https://stackoverflow.com/a/363732
     static int generateRandomInt(int min, int max) {
         return min + (int) (Math.random() * (max - min + 1));
