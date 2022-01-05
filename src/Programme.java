@@ -1,11 +1,10 @@
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Programme {
 
+    // TODO Fix le problème des divisions et modulos dans les bounding box et les textes centrés
     static final String GAME_NAME = "Jeux de Mémoire";
     static final int TERMINAL_MINLENGTH = 100;
     static final int TERMINAL_MINHEIGHT = 15;
@@ -184,6 +183,45 @@ public class Programme {
         return item;
     }
 
+    // Retourne la chaine de caractères saisi par l'utilisateur
+    static String requestString(String question) {
+        try {
+            clearConsole();
+            showBoundingBoxWithContent("Demande de chaine de caractères", question);
+            System.out.print(" > ");
+            return EConsole.lireString();
+        } catch (IOException ex) {
+            showErrorMessage("Demande de chaine de caractères", "-> Impossible de lire la chaine de caractères, veuillez réessayer");
+            return requestString(question);
+        }
+    }
+
+    // Retourne l'entier saisi par l'utilisateur
+    // L'entier saisi doit être compris entre min (inclus) et max (inclus)
+    static int requestInteger(String question, int min, int max) {
+        int integer;
+        do {
+            integer = requestInteger(question);
+            if (integer < min || integer > max) {
+                showWarningMessage("Demande d'entier", "-> Veuillez saisir un entier entre " + min + " et " + max);
+            }
+        } while (integer < min || integer > max);
+        return integer;
+    }
+
+    // Retourne l'entier saisi par l'utilisateur
+    static int requestInteger(String question) {
+        try {
+            clearConsole();
+            showBoundingBoxWithContent("Demande d'entier", question);
+            System.out.print(" > ");
+            return EConsole.lireInt();
+        } catch (IOException ex) {
+            showErrorMessage("Demande d'entier", "-> Impossible de lire l'entier, veuillez réessayer");
+            return requestInteger(question);
+        }
+    }
+
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
     static void showBoundingBoxWithContent(String title, String... lines) {
         // On défini la longueur par défaut si aucune n'est spécifié
@@ -249,6 +287,15 @@ public class Programme {
         System.out.println("/");
     }
 
+    // Met le programme en pause pendant x ms
+    static void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ex) {
+            showErrorMessage("Attendre", "-> Impossible d'attendre " + millis + "ms");
+        }
+    }
+
     // Affiche un message d'avertissement à l'utilisateur
     static void showWarningMessage(String... message) {
         showMessage("ATTENTION", message);
@@ -278,7 +325,7 @@ public class Programme {
             showBoundingBoxWithContent(title, minLength, minHeight, message);
             EConsole.lireString();
         } catch (IOException ex) {
-            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("ERROR");
         }
     }
 
@@ -398,7 +445,6 @@ public class Programme {
             // On concatène le caractère seulement si c'est une lettre
             if (c >= 'a' && c <= 'z') {
                 mot += c;
-
                 // On traite aussi les 2 caractères spéciaux "æ" et "œ"
             } else if (c == 'æ') {
                 mot += "ae";
@@ -465,14 +511,5 @@ public class Programme {
     // Source: https://stackoverflow.com/a/363732
     static int generateRandomInt(int min, int max) {
         return min + (int) (Math.random() * (max - min + 1));
-    }
-
-    // Met le programme en pause pendant x ms
-    static void sleep(int millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 }
