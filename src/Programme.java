@@ -6,7 +6,9 @@ import java.util.logging.Logger;
 
 public class Programme {
 
-    static String GAME_NAME = "Jeux de Mémoire";
+    static final String GAME_NAME = "Jeux de Mémoire";
+    static final int TERMINAL_MINLENGTH = 100;
+    static final int TERMINAL_MINHEIGHT = 15;
 
     public static void main(String[] args) {
         startGame();
@@ -38,10 +40,17 @@ public class Programme {
         return stats;
     }
 
+    static void addStat(String[][] stats, String gameID, String difficulty, String score, String playerName) {
+        stats[0] = addToTable(stats[0], gameID);
+        stats[1] = addToTable(stats[1], difficulty);
+        stats[2] = addToTable(stats[2], score);
+        stats[3] = addToTable(stats[3], playerName);
+    }
+
     // Affiche un faux écran de chargement, plus speed est proche de 0 plus le chargement est rapide
     static void showLoadingScreen(int speed) {
         if (speed <= 0) {
-            showErrorMessage("Écran de chargement", "", "Speed doit être supérieur à 0");
+            showErrorMessage("Écran de chargement", "-> Speed doit être supérieur à 0");
             return;
         }
         for (int i = 0; i < 24; i++) {
@@ -91,7 +100,22 @@ public class Programme {
 
     // Affiche le menu des statistiques
     static void showStatsMenu(String[][] stats) {
-        devMessage("Statistiques");
+        String[] message = new String[0];
+        int gameIDLength = getMaximumLength(addToTable(stats[0], "  Jeux  "));
+        int difficultyLength = getMaximumLength(addToTable(stats[1], "  Difficulté  "));
+        int scoreLength = getMaximumLength(addToTable(stats[2], "  Score  "));
+        int playerNameLength = getMaximumLength(addToTable(stats[3], "  Nom du joueur  "));
+        message = addToTable(message, getCenteredText("Jeux", '-', ' ', gameIDLength)
+                + getCenteredText("Difficulté", '-', ' ', difficultyLength)
+                + getCenteredText("Score", '-', ' ', scoreLength)
+                + getCenteredText("Nom du joueur", '-', ' ', playerNameLength));
+        for (int i = 0; i < stats[0].length; i++) {
+            message = addToTable(message, getCenteredText(stats[0][i], ' ', ' ', gameIDLength)
+                    + getCenteredText(stats[1][i], ' ', ' ', difficultyLength)
+                    + getCenteredText(stats[2][i], ' ', ' ', scoreLength)
+                    + getCenteredText(stats[3][i], ' ', ' ', playerNameLength));
+        }
+        showMessage("Statistiques", message);
     }
 
     // Affiche le menu de sélection des jeux
@@ -141,13 +165,11 @@ public class Programme {
             clearConsole();
             String[] lines = new String[0];
             if (!subTitle.equals("")) {
-                lines = enlargeTable(lines);
-                lines[lines.length - 1] = subTitle;
+                lines = addToTable(lines, subTitle);
             }
             for (int i = 0; i < choices.length; i++) {
                 String choice = choices[i];
-                lines = enlargeTable(lines);
-                lines[lines.length - 1] = i + 1 + ". " + choice;
+                lines = addToTable(lines, i + 1 + ". " + choice);
             }
             showBoundingBoxWithContent(title, lines);
             System.out.print("Choix > ");
@@ -174,15 +196,21 @@ public class Programme {
 
     // Affiche un message à l'utilisateur
     static void showMessage(String title, String... message) {
+        showMessage(title, TERMINAL_MINLENGTH, message);
+    }
+
+    // Affiche un message à l'utilisateur
+    static void showMessage(String title, int minLength, String... message) {
+        showMessage(title, minLength, TERMINAL_MINHEIGHT, message);
+    }
+
+    // Affiche un message à l'utilisateur
+    static void showMessage(String title, int minLength, int minHeight, String... message) {
         try {
             clearConsole();
-            message = enlargeTable(message);
-            message[message.length - 1] = "";
-            message = enlargeTable(message);
-            message[message.length - 1] = "";
-            message = enlargeTable(message);
-            message[message.length - 1] = "Appuyez sur Entrée pour continuer...";
-            showBoundingBoxWithContent(title, message);
+            message = addToTable(message, "");
+            message = addToTable(message, "Appuyez sur Entrée pour continuer...");
+            showBoundingBoxWithContent(title, minLength, minHeight, message);
             EConsole.lireString();
         } catch (IOException ex) {
             Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
@@ -192,13 +220,13 @@ public class Programme {
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
     static void showBoundingBoxWithContent(String title, String... lines) {
         // On défini la longueur par défaut si aucune n'est spécifié
-        showBoundingBoxWithContent(title, 100, lines);
+        showBoundingBoxWithContent(title, TERMINAL_MINLENGTH, lines);
     }
 
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
     static void showBoundingBoxWithContent(String title, int minLength, String... lines) {
         // On défini la hauteur par défaut si aucune n'est spécifié
-        showBoundingBoxWithContent(title, minLength, 15, lines);
+        showBoundingBoxWithContent(title, minLength, TERMINAL_MINHEIGHT, lines);
     }
 
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
@@ -272,8 +300,7 @@ public class Programme {
 
         // Moitié de la longeur disponible - Moitié de la longueur du texte (text + les 2 separator) obligatoire à retourner
         int halfLength = length / 2 - (text.length() + 2) / 2;
-        // Un de moins si une divisions au dessus a un reste
-        for (int i = 0; i < halfLength - (text.length() + 2) % 2; i++) {
+        for (int i = 0; i < halfLength; i++) {
             result += spacer;
         }
 
@@ -282,7 +309,7 @@ public class Programme {
         result += separator;
 
         // Un de plus si une divisions au dessus a un reste
-        for (int i = 0; i < halfLength + length % 2; i++) {
+        for (int i = 0; i < halfLength + length % 2 - (text.length() + 2) % 2; i++) {
             result += spacer;
         }
 
@@ -344,7 +371,7 @@ public class Programme {
             String texte = Lecteur.LireTexte(filePath);
             return formatTextToWords(texte);
         } catch (IOException err1) {
-            showErrorMessage("Erreur lors de la lecture du fichier,", "Fichier: " + filePath);
+            showErrorMessage("Erreur lors de la lecture du fichier,", "-> Fichier: " + filePath);
             // On retourne un tableau vide puisqu'une exception a été levée
             return new String[0];
         }
@@ -394,8 +421,7 @@ public class Programme {
                 // On ajoute le mot seulement si le mot n'est pas déjà contenu dans le tableau et si ce n'est pas une lettre seule
                 // (exemple: le mot "c" ne sera pas ajouté dans le tableau puisque c'est une lettre seule)
                 if (mot.length() > 1 && !isIncludedInTable(mot, mots)) {
-                    mots = enlargeTable(mots);
-                    mots[mots.length - 1] = mot;
+                    mots = addToTable(mots, mot);
                 }
                 mot = "";
             }
@@ -414,6 +440,13 @@ public class Programme {
         }
 
         return false;
+    }
+
+    // Retourne un tableau au contenu identique à celui entré en paramètres mais avec item en plus en dernier index
+    static String[] addToTable(String[] table, String item) {
+        String[] result = enlargeTable(table);
+        result[result.length - 1] = item;
+        return result;
     }
 
     // Retourne un tableau au contenu identique à celui entré en paramètres mais avec un emplacement vide en dernier index
