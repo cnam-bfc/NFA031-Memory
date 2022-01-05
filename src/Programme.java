@@ -188,7 +188,7 @@ public class Programme {
         try {
             clearConsole();
             showBoundingBoxWithContent("Demande de chaine de caractères", question);
-            System.out.print(" > ");
+            System.out.print("Saisie > ");
             return EConsole.lireString();
         } catch (IOException ex) {
             showErrorMessage("Demande de chaine de caractères", "-> Impossible de lire la chaine de caractères, veuillez réessayer");
@@ -214,7 +214,7 @@ public class Programme {
         try {
             clearConsole();
             showBoundingBoxWithContent("Demande d'entier", question);
-            System.out.print(" > ");
+            System.out.print("Saisie > ");
             return EConsole.lireInt();
         } catch (IOException ex) {
             showErrorMessage("Demande d'entier", "-> Impossible de lire l'entier, veuillez réessayer");
