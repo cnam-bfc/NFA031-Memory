@@ -124,7 +124,7 @@ public class Programme {
         return false;
     }
 
-    // Affiche un menu à l'utilisateur avec un titre, une sous-titre et les choises passés en paramètre
+    // Affiche un menu à l'utilisateur avec un titre, un sous-titre et les choix passés en paramètre
     // Retourne le numéro du choix de l'utilisateur
     static int showMenu(String title, String subTitle, String... choices) {
         int item = 0;
@@ -354,8 +354,7 @@ public class Programme {
         // On parcours le texte caractère par caractère
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            // On enlève les accents des lettres et on concatène le caractère seulement si c'est une lettre
-            // On traite aussi les 2 caractères spéciaux "æ" et "œ"
+            // On enlève les accents des lettres
             switch (c) {
                 case 'à', 'â', 'ä' ->
                     c = 'a';
@@ -372,9 +371,12 @@ public class Programme {
                 case 'ç' ->
                     c = 'c';
             }
-
+            
+            // On concatène le caractère seulement si c'est une lettre
             if (c >= 'a' && c <= 'z') {
                 mot += c;
+                
+            // On traite aussi les 2 caractères spéciaux "æ" et "œ"
             } else if (c == 'æ') {
                 mot += "ae";
             } else if (c == 'œ') {
