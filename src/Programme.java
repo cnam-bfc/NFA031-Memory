@@ -69,7 +69,7 @@ public class Programme {
         } while (menuCode != 4);
     }
 
-    // Affiche le menu des statistiques
+    // Affiche le menu des statistiques quand on quitte le programme
     static void showQuitMenu(String[] stats) {
         clearConsole();
         showBoundingBoxWithContent(GAME_NAME, "À bientôt...");
