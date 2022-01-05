@@ -216,7 +216,8 @@ public class Programme {
 
         // Bourage avec des lignes vide pour qu'il y ai au moins minHeight lignes dans la boite
         int halfMinHeight = minHeight / 2 - lines.length / 2;
-        for (int i = 0; i < halfMinHeight; i++) {
+        // - une si la division de halfMinHeight à un reste
+        for (int i = 0; i < halfMinHeight - lines.length % 2; i++) {
             System.out.print("|");
             System.out.print(getCenteredText("", ' ', ' ', minLength));
             System.out.println("|");
@@ -230,7 +231,7 @@ public class Programme {
         }
 
         // Bourage avec des lignes vide + une si la division de halfMinHeight à un reste
-        for (int i = 0; i < halfMinHeight + minHeight % 2 - lines.length % 2; i++) {
+        for (int i = 0; i < halfMinHeight + minHeight % 2; i++) {
             System.out.print("|");
             System.out.print(getCenteredText("", ' ', ' ', minLength));
             System.out.println("|");
@@ -260,7 +261,8 @@ public class Programme {
 
         // Moitié de la longeur disponible - Moitié de la longueur du texte (text + les 2 separator) obligatoire à retourner
         int halfLength = length / 2 - (text.length() + 2) / 2;
-        for (int i = 0; i < halfLength; i++) {
+        // Un de moins si une divisions au dessus a un reste
+        for (int i = 0; i < halfLength - (text.length() + 2) % 2; i++) {
             result += spacer;
         }
 
@@ -268,8 +270,8 @@ public class Programme {
         result += text;
         result += separator;
 
-        // En plus des spacer à imprimer ou pas on en imprime un de plus si les 2 divisions au dessus ont un reste
-        for (int i = 0; i < halfLength + length % 2 - (text.length() + 2) % 2; i++) {
+        // Un de plus si une divisions au dessus a un reste
+        for (int i = 0; i < halfLength + length % 2; i++) {
             result += spacer;
         }
 
