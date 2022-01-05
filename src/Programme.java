@@ -97,6 +97,8 @@ public class Programme {
                     showAgain = !launchSerieDeNombresGame(stats);
                 case 3 ->
                     showAgain = !launchPairesDeMotsGame(stats);
+                case 4 ->
+                    showAgain = false;
             }
         } while (showAgain);
     }
