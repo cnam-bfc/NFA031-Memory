@@ -9,6 +9,7 @@ public class Programme {
     static final int TERMINAL_MINLENGTH = 100;
     static final int TERMINAL_MINHEIGHT = 15;
     static final int TERMINAL_HEIGHT = 15;
+    static final String[] GAMES_NAMES = {"Série de mots", "Série de nombres", "Liste de paires de mots"};
 
     public static void main(String[] args) {
         startGame();
@@ -40,8 +41,8 @@ public class Programme {
         return stats;
     }
 
-    static void addStat(String[][] stats, String gameID, String difficulty, String score, String playerName) {
-        stats[0] = addToTable(stats[0], gameID);
+    static void addStat(String[][] stats, String gameName, String difficulty, String score, String playerName) {
+        stats[0] = addToTable(stats[0], gameName);
         stats[1] = addToTable(stats[1], difficulty);
         stats[2] = addToTable(stats[2], score);
         stats[3] = addToTable(stats[3], playerName);
@@ -77,8 +78,15 @@ public class Programme {
             switch (menuCode) {
                 case 1 ->
                     showGameMenu(stats);
-                case 2 ->
-                    showStatsMenu(stats);
+                case 2 -> {
+                    int statsMenuCode;
+                    do {
+                        statsMenuCode = showMenu("Statistiques", "De quel jeu voulez-vous voir les statistiques?", GAMES_NAMES[0], GAMES_NAMES[1], GAMES_NAMES[2], "Retour");
+                        if (statsMenuCode != GAMES_NAMES.length + 1) {
+                            showStatsMenu(stats, GAMES_NAMES[statsMenuCode - 1]);
+                        }
+                    } while (statsMenuCode != GAMES_NAMES.length + 1);
+                }
                 case 3 ->
                     showSettingsMenu(stats);
                 case 4 ->
@@ -98,22 +106,24 @@ public class Programme {
         devMessage("Paramètres");
     }
 
-    // Affiche le menu des statistiques
-    static void showStatsMenu(String[][] stats) {
+    // Affiche le menu des statistiques d'un jeu en particulié
+    static void showStatsMenu(String[][] stats, String gameID) {
         String[] message = new String[0];
-        int gameIDLength = getMaximumLength(addToTable(stats[0], "  Jeux  "));
+        int gameNameLength = getMaximumLength(addToTable(stats[0], "  Jeux  "));
         int difficultyLength = getMaximumLength(addToTable(stats[1], "  Difficulté  "));
         int scoreLength = getMaximumLength(addToTable(stats[2], "  Score  "));
         int playerNameLength = getMaximumLength(addToTable(stats[3], "  Nom du joueur  "));
-        message = addToTable(message, getCenteredText("Jeux", '-', ' ', gameIDLength)
+        message = addToTable(message, getCenteredText("Jeux", '-', ' ', gameNameLength)
                 + getCenteredText("Difficulté", '-', ' ', difficultyLength)
                 + getCenteredText("Score", '-', ' ', scoreLength)
                 + getCenteredText("Nom du joueur", '-', ' ', playerNameLength));
         for (int i = 0; i < stats[0].length; i++) {
-            message = addToTable(message, getCenteredText(stats[0][i], ' ', ' ', gameIDLength)
-                    + getCenteredText(stats[1][i], ' ', ' ', difficultyLength)
-                    + getCenteredText(stats[2][i], ' ', ' ', scoreLength)
-                    + getCenteredText(stats[3][i], ' ', ' ', playerNameLength));
+            if (stats[0][i].equals(gameID)) {
+                message = addToTable(message, getCenteredText(stats[0][i], ' ', ' ', gameNameLength)
+                        + getCenteredText(stats[1][i], ' ', ' ', difficultyLength)
+                        + getCenteredText(stats[2][i], ' ', ' ', scoreLength)
+                        + getCenteredText(stats[3][i], ' ', ' ', playerNameLength));
+            }
         }
         showMessage("Statistiques", message);
     }
@@ -122,7 +132,7 @@ public class Programme {
     static void showGameMenu(String[][] stats) {
         boolean showAgain = true;
         while (showAgain) {
-            int menuCode = showMenu("Choix du jeu", "", "Série de mots", "Série de nombres", "Liste de paires de mots", "Retour");
+            int menuCode = showMenu("Choix du jeu", "", GAMES_NAMES[0], GAMES_NAMES[1], GAMES_NAMES[2], "Retour");
             switch (menuCode) {
                 case 1 ->
                     showAgain = !launchSerieDeMotsGame(stats);
@@ -139,12 +149,22 @@ public class Programme {
     // Lance le jeu de série de mots
     // Retourne vrai si tout s'est bien passé
     static boolean launchSerieDeMotsGame(String[][] stats) {
-        String difficulty = requestDifficulty();
+        String difficulty = askDifficulty();
         if (difficulty.equals("")) {
             return false;
         }
-        devMessage("Série de mots");
-        return false;
+        String[] mots = readText("Extrait_texte");
+        boolean replay = true;
+        while (replay) {
+
+            addStat(stats, GAMES_NAMES[0], difficulty, "0", askString("Quel est votre pseudo?"));
+            showStatsMenu(stats, GAMES_NAMES[0]);
+            replay = askReplay();
+            if (replay && !askReplayWithSameData()) {
+                mots = readText("Extrait_texte");
+            }
+        }
+        return true;
     }
 
     // Lance le jeu de série de nombres
@@ -161,8 +181,18 @@ public class Programme {
         return false;
     }
 
+    static boolean askReplay() {
+        int menuCode = showMenu("Rejouer", "Voulez-vous rejouer au même jeu?", "Oui", "Non");
+        return menuCode == 1;
+    }
+
+    static boolean askReplayWithSameData() {
+        int menuCode = showMenu("Rejouer", "Voulez-vous rejouer avec les mêmes données?", "Oui", "Non");
+        return menuCode == 1;
+    }
+
     // Retourne la difficulté demandé au joueur
-    static String requestDifficulty() {
+    static String askDifficulty() {
         int menuCode = showMenu("Difficulté", "", "Facile", "Normal", "Difficile", "Personnalisé", "Retour");
         switch (menuCode) {
             case 1 -> {
@@ -179,9 +209,9 @@ public class Programme {
             }
             case 4 -> {
                 // Personnalisé
-                int nbTermes = requestInteger("Saisissez le nombre de termes désiré", 1, 100);
-                int minLength = requestInteger("Saisissez le minimum de caractères d'un terme", 1, 10);
-                int maxLength = requestInteger("Saisissez le maximum de caractères d'un terme", minLength, 30);
+                int nbTermes = askInteger("Saisissez le nombre de termes désiré", 1, 100);
+                int minLength = askInteger("Saisissez le minimum de caractères d'un terme", 1, 10);
+                int maxLength = askInteger("Saisissez le maximum de caractères d'un terme", minLength, 30);
                 return convertDifficultyToString(nbTermes, minLength, maxLength);
             }
             default -> {
@@ -239,7 +269,7 @@ public class Programme {
     }
 
     // Retourne la chaine de caractères saisi par l'utilisateur
-    static String requestString(String question) {
+    static String askString(String question) {
         try {
             clearConsole();
             showBoundingBoxWithContent("Demande de chaine de caractères", question);
@@ -247,16 +277,16 @@ public class Programme {
             return EConsole.lireString();
         } catch (IOException ex) {
             showErrorMessage("Demande de chaine de caractères", "-> Impossible de lire la chaine de caractères, veuillez réessayer");
-            return requestString(question);
+            return askString(question);
         }
     }
 
     // Retourne l'entier saisi par l'utilisateur
     // L'entier saisi doit être compris entre min (inclus) et max (inclus)
-    static int requestInteger(String question, int min, int max) {
+    static int askInteger(String question, int min, int max) {
         int integer;
         do {
-            integer = requestInteger(question);
+            integer = askInteger(question);
             if (integer < min || integer > max) {
                 showWarningMessage("Demande d'entier", "-> Veuillez saisir un entier entre " + min + " et " + max);
             }
@@ -265,7 +295,7 @@ public class Programme {
     }
 
     // Retourne l'entier saisi par l'utilisateur
-    static int requestInteger(String question) {
+    static int askInteger(String question) {
         try {
             clearConsole();
             showBoundingBoxWithContent("Demande d'entier", question);
@@ -273,10 +303,10 @@ public class Programme {
             return EConsole.lireInt();
         } catch (NumberFormatException ex) {
             showWarningMessage("Demande d'entier", "-> Veuillez saisir un entier");
-            return requestInteger(question);
+            return askInteger(question);
         } catch (IOException ex) {
             showErrorMessage("Demande d'entier", "-> Impossible de lire l'entier, veuillez réessayer");
-            return requestInteger(question);
+            return askInteger(question);
         }
     }
 
