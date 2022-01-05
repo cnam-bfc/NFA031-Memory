@@ -21,12 +21,21 @@ public class Programme {
     static void startGame() {
         // TODO Augmenter cette valeur
         showLoadingScreen(100);
-        String[] stats = initStats();
+        String[][] stats = initStats();
         showMainMenu(stats);
     }
 
-    static String[] initStats() {
-        return new String[0];
+    static String[][] initStats() {
+        String[][] stats = new String[4][];
+        // Numéro du jeu de la partie
+        stats[0] = new String[0];
+        // Difficulté de la partie
+        stats[1] = new String[0];
+        // Score de la partie
+        stats[2] = new String[0];
+        // Nom du joueur
+        stats[3] = new String[0];
+        return stats;
     }
 
     // Affiche un faux écran de chargement, plus speed est proche de 0 plus le chargement est rapide
@@ -52,7 +61,7 @@ public class Programme {
     }
 
     // Affiche le menu principal
-    static void showMainMenu(String[] stats) {
+    static void showMainMenu(String[][] stats) {
         int menuCode;
         do {
             menuCode = showMenu("Menu principal", "", "Jouer", "Statistiques", "Paramètres", "Quitter");
@@ -70,23 +79,23 @@ public class Programme {
     }
 
     // Affiche le menu des statistiques quand on quitte le programme
-    static void showQuitMenu(String[] stats) {
+    static void showQuitMenu(String[][] stats) {
         clearConsole();
         showBoundingBoxWithContent(GAME_NAME, "À bientôt...");
     }
 
     // Affiche le menu des paramètres
-    static void showSettingsMenu(String[] stats) {
+    static void showSettingsMenu(String[][] stats) {
         devMessage("Paramètres");
     }
 
     // Affiche le menu des statistiques
-    static void showStatsMenu(String[] stats) {
+    static void showStatsMenu(String[][] stats) {
         devMessage("Statistiques");
     }
 
     // Affiche le menu de sélection des jeux
-    static void showGameMenu(String[] stats) {
+    static void showGameMenu(String[][] stats) {
         boolean showAgain = false;
         do {
             int menuCode = showMenu("Choix du jeu", "", "Série de mots", "Série de nombres", "Liste de paires de mots", "Retour");
@@ -105,21 +114,21 @@ public class Programme {
 
     // Lance le jeu de série de mots
     // Retourne vrai si tout s'est bien passé
-    static boolean launchSerieDeMotsGame(String[] stats) {
+    static boolean launchSerieDeMotsGame(String[][] stats) {
         devMessage("Série de mots");
         return false;
     }
 
     // Lance le jeu de série de nombres
     // Retourne vrai si tout s'est bien passé
-    static boolean launchSerieDeNombresGame(String[] stats) {
+    static boolean launchSerieDeNombresGame(String[][] stats) {
         devMessage("Série de nombres");
         return false;
     }
 
     // Lance le jeu de paires de mots
     // Retourne vrai si tout s'est bien passé
-    static boolean launchPairesDeMotsGame(String[] stats) {
+    static boolean launchPairesDeMotsGame(String[][] stats) {
         devMessage("Paires de mots");
         return false;
     }
@@ -371,12 +380,12 @@ public class Programme {
                 case 'ç' ->
                     c = 'c';
             }
-            
+
             // On concatène le caractère seulement si c'est une lettre
             if (c >= 'a' && c <= 'z') {
                 mot += c;
-                
-            // On traite aussi les 2 caractères spéciaux "æ" et "œ"
+
+                // On traite aussi les 2 caractères spéciaux "æ" et "œ"
             } else if (c == 'æ') {
                 mot += "ae";
             } else if (c == 'œ') {
