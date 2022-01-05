@@ -8,6 +8,7 @@ public class Programme {
     static final String GAME_NAME = "Jeux de Mémoire";
     static final int TERMINAL_MINLENGTH = 100;
     static final int TERMINAL_MINHEIGHT = 15;
+    static final int TERMINAL_HEIGHT = 15;
 
     public static void main(String[] args) {
         startGame();
@@ -119,8 +120,8 @@ public class Programme {
 
     // Affiche le menu de sélection des jeux
     static void showGameMenu(String[][] stats) {
-        boolean showAgain = false;
-        do {
+        boolean showAgain = true;
+        while (showAgain) {
             int menuCode = showMenu("Choix du jeu", "", "Série de mots", "Série de nombres", "Liste de paires de mots", "Retour");
             switch (menuCode) {
                 case 1 ->
@@ -132,12 +133,16 @@ public class Programme {
                 case 4 ->
                     showAgain = false;
             }
-        } while (showAgain);
+        }
     }
 
     // Lance le jeu de série de mots
     // Retourne vrai si tout s'est bien passé
     static boolean launchSerieDeMotsGame(String[][] stats) {
+        String difficulty = requestDifficulty();
+        if (difficulty.equals("")) {
+            return false;
+        }
         devMessage("Série de mots");
         return false;
     }
@@ -154,6 +159,56 @@ public class Programme {
     static boolean launchPairesDeMotsGame(String[][] stats) {
         devMessage("Paires de mots");
         return false;
+    }
+
+    // Retourne la difficulté demandé au joueur
+    static String requestDifficulty() {
+        int menuCode = showMenu("Difficulté", "", "Facile", "Normal", "Difficile", "Personnalisé", "Retour");
+        switch (menuCode) {
+            case 1 -> {
+                // Facile
+                return convertDifficultyToString(3, 2, 5);
+            }
+            case 2 -> {
+                // Normal
+                return convertDifficultyToString(5, 3, 6);
+            }
+            case 3 -> {
+                // Difficile
+                return convertDifficultyToString(7, 4, 10);
+            }
+            case 4 -> {
+                // Personnalisé
+                int nbTermes = requestInteger("Saisissez le nombre de termes désiré", 1, 100);
+                int minLength = requestInteger("Saisissez le minimum de caractères d'un terme", 1, 10);
+                int maxLength = requestInteger("Saisissez le maximum de caractères d'un terme", minLength, 30);
+                return convertDifficultyToString(nbTermes, minLength, maxLength);
+            }
+            default -> {
+                // Retour
+                return "";
+            }
+        }
+    }
+
+    // Converti la difficulté en String
+    static String convertDifficultyToString(int nbTermes, int minLength, int maxLength) {
+        return nbTermes + "/" + minLength + "/" + maxLength;
+    }
+
+    // Retourne le nombre de termes de la difficulté
+    static int getNbTermesDifficulty(String difficulty) {
+        return Integer.parseInt(difficulty.split("/")[0]);
+    }
+
+    // Retourne le minimum de la longueur des termes de la difficulté
+    static int getMinLengthDifficulty(String difficulty) {
+        return Integer.parseInt(difficulty.split("/")[1]);
+    }
+
+    // Retourne le maximum de la longueur des termes de la difficulté
+    static int getMaxLengthDifficulty(String difficulty) {
+        return Integer.parseInt(difficulty.split("/")[2]);
     }
 
     // Affiche un menu à l'utilisateur avec un titre, un sous-titre et les choix passés en paramètre
@@ -216,6 +271,9 @@ public class Programme {
             showBoundingBoxWithContent("Demande d'entier", question);
             System.out.print("Saisie > ");
             return EConsole.lireInt();
+        } catch (NumberFormatException ex) {
+            showWarningMessage("Demande d'entier", "-> Veuillez saisir un entier");
+            return requestInteger(question);
         } catch (IOException ex) {
             showErrorMessage("Demande d'entier", "-> Impossible de lire l'entier, veuillez réessayer");
             return requestInteger(question);
@@ -366,6 +424,9 @@ public class Programme {
     // Efface le contenu de la console
     // Source: https://stackoverflow.com/a/32295974
     static void clearConsole() {
+        for (int i = 0; i < TERMINAL_HEIGHT; i++) {
+            System.out.println();
+        }
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
