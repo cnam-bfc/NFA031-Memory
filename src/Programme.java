@@ -184,39 +184,6 @@ public class Programme {
         return item;
     }
 
-    // Affiche un message d'avertissement à l'utilisateur
-    static void showWarningMessage(String... message) {
-        showMessage("ATTENTION", message);
-    }
-
-    // Affiche un message d'erreur à l'utilisateur
-    static void showErrorMessage(String... message) {
-        showMessage("ERREUR", message);
-    }
-
-    // Affiche un message à l'utilisateur
-    static void showMessage(String title, String... message) {
-        showMessage(title, TERMINAL_MINLENGTH, message);
-    }
-
-    // Affiche un message à l'utilisateur
-    static void showMessage(String title, int minLength, String... message) {
-        showMessage(title, minLength, TERMINAL_MINHEIGHT, message);
-    }
-
-    // Affiche un message à l'utilisateur
-    static void showMessage(String title, int minLength, int minHeight, String... message) {
-        try {
-            clearConsole();
-            message = addToTable(message, "");
-            message = addToTable(message, "Appuyez sur Entrée pour continuer...");
-            showBoundingBoxWithContent(title, minLength, minHeight, message);
-            EConsole.lireString();
-        } catch (IOException ex) {
-            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
     static void showBoundingBoxWithContent(String title, String... lines) {
         // On défini la longueur par défaut si aucune n'est spécifié
@@ -282,6 +249,39 @@ public class Programme {
         System.out.println("/");
     }
 
+    // Affiche un message d'avertissement à l'utilisateur
+    static void showWarningMessage(String... message) {
+        showMessage("ATTENTION", message);
+    }
+
+    // Affiche un message d'erreur à l'utilisateur
+    static void showErrorMessage(String... message) {
+        showMessage("ERREUR", message);
+    }
+
+    // Affiche un message à l'utilisateur
+    static void showMessage(String title, String... message) {
+        showMessage(title, TERMINAL_MINLENGTH, message);
+    }
+
+    // Affiche un message à l'utilisateur
+    static void showMessage(String title, int minLength, String... message) {
+        showMessage(title, minLength, TERMINAL_MINHEIGHT, message);
+    }
+
+    // Affiche un message à l'utilisateur
+    static void showMessage(String title, int minLength, int minHeight, String... message) {
+        try {
+            clearConsole();
+            message = addToTable(message, "");
+            message = addToTable(message, "Appuyez sur Entrée pour continuer...");
+            showBoundingBoxWithContent(title, minLength, minHeight, message);
+            EConsole.lireString();
+        } catch (IOException ex) {
+            Logger.getLogger(Programme.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     // Retourne la chaine de caractères passé en paramètre centré avec des caractères passé en paramètre
     // Au moins un spacer est retourné de chaque côté du text
     static String getCenteredText(String text, char spacer, int length) {
@@ -316,19 +316,6 @@ public class Programme {
         return result;
     }
 
-    // Retourne la longueur la plus meximal des chaines de caractères contenu dans le tableau
-    static int getMaximumLength(String[] table) {
-        int max = 0;
-
-        for (String str : table) {
-            if (str.length() > max) {
-                max = str.length();
-            }
-        }
-
-        return max;
-    }
-
     // Efface le contenu de la console
     // Source: https://stackoverflow.com/a/32295974
     static void clearConsole() {
@@ -351,19 +338,6 @@ public class Programme {
         return new String[0];
     }
 
-    // Retourne vrai si le fichier existe
-    // Retourne faux si il n'existe pas
-    static boolean fileExists(String filePath) {
-        try {
-            Lecteur.LireTexte(filePath);
-            return true;
-        } catch (FileNotFoundException ex) {
-            return false;
-        } catch (IOException ex) {
-            return false;
-        }
-    }
-
     // Retourne un tableau des mots d'un fichier texte
     // Retourne un tableau de 0 valeurs si une exception est levée
     static String[] readFile(String filePath) {
@@ -374,6 +348,19 @@ public class Programme {
             showErrorMessage("Erreur lors de la lecture du fichier,", "-> Fichier: " + filePath);
             // On retourne un tableau vide puisqu'une exception a été levée
             return new String[0];
+        }
+    }
+
+    // Retourne vrai si le fichier existe
+    // Retourne faux si il n'existe pas
+    static boolean fileExists(String filePath) {
+        try {
+            Lecteur.LireTexte(filePath);
+            return true;
+        } catch (FileNotFoundException ex) {
+            return false;
+        } catch (IOException ex) {
+            return false;
         }
     }
 
@@ -459,6 +446,19 @@ public class Programme {
         }
 
         return result;
+    }
+
+    // Retourne la longueur la plus meximal des chaines de caractères contenu dans le tableau
+    static int getMaximumLength(String[] table) {
+        int max = 0;
+
+        for (String str : table) {
+            if (str.length() > max) {
+                max = str.length();
+            }
+        }
+
+        return max;
     }
 
     // Retourne un entier pseudo-aléatoirement entre min (inclus) et max (inclus)
