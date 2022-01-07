@@ -4,7 +4,6 @@ import java.io.IOException;
 
 public class Programme {
 
-    // TODO Fix le problème des divisions et modulos dans les bounding box et les textes centrés
     static final String GAME_NAME = "Jeux de Mémoire";
     static final int TERMINAL_MINLENGTH = 100;
     static final int TERMINAL_MINHEIGHT = 15;
@@ -348,9 +347,8 @@ public class Programme {
         System.out.println("\\");
 
         // Bourage avec des lignes vide pour qu'il y ai au moins minHeight lignes dans la boite
-        int halfMinHeight = minHeight / 2 - lines.length / 2;
-        // - une si la division de halfMinHeight à un reste
-        for (int i = 0; i < halfMinHeight - lines.length % 2; i++) {
+        int paddingHeight = minHeight - lines.length;
+        for (int i = 0; i < paddingHeight / 2; i++) {
             System.out.print("|");
             System.out.print(centerText("", ' ', ' ', minLength));
             System.out.println("|");
@@ -363,8 +361,8 @@ public class Programme {
             System.out.println("|");
         }
 
-        // Bourage avec des lignes vide + une si la division de halfMinHeight à un reste
-        for (int i = 0; i < halfMinHeight + minHeight % 2; i++) {
+        // Bourage avec des lignes vide + une si la division de paddingHeight à un reste
+        for (int i = 0; i < paddingHeight / 2 + paddingHeight % 2; i++) {
             System.out.print("|");
             System.out.print(centerText("", ' ', ' ', minLength));
             System.out.println("|");
@@ -434,9 +432,10 @@ public class Programme {
             length = minimumLength;
         }
 
-        // Moitié de la longeur disponible - Moitié de la longueur du texte (text + les 2 separator) obligatoire à retourner
-        int halfLength = length / 2 - (text.length() + 2) / 2;
-        for (int i = 0; i < halfLength; i++) {
+        // Bourage avec des spacer pour qu'il y ai au moins length caractères dans la ligne
+        // Longeur à retourner - La longueur du texte (text + les 2 separator) obligatoire à retourner
+        int paddingLength = length - text.length() - 2;
+        for (int i = 0; i < paddingLength / 2; i++) {
             result += spacer;
         }
 
@@ -444,8 +443,8 @@ public class Programme {
         result += text;
         result += separator;
 
-        // Un de plus si une divisions au dessus a un reste
-        for (int i = 0; i < halfLength + length % 2 - (text.length() + 2) % 2; i++) {
+        // Bourage avec des spacer pour qu'il y ai au moins length caractères dans la ligne + un si la division de paddingLength à un reste
+        for (int i = 0; i < paddingLength / 2 + paddingLength % 2; i++) {
             result += spacer;
         }
 
