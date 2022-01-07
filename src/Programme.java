@@ -454,6 +454,7 @@ public class Programme {
     // Efface le contenu de la console
     // Source: https://stackoverflow.com/a/32295974
     static void clearConsole() {
+        // On imprime des retour à la ligne au cas où le scroll ci-dessous ne fonctionne pas
         for (int i = 0; i < TERMINAL_HEIGHT; i++) {
             System.out.println();
         }
