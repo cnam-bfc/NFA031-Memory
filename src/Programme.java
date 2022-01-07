@@ -113,16 +113,16 @@ public class Programme {
         int difficultyLength = getMaximumLength(addToTable(stats[1], "  Difficulté  "));
         int scoreLength = getMaximumLength(addToTable(stats[2], "  Score  "));
         int playerNameLength = getMaximumLength(addToTable(stats[3], "  Nom du joueur  "));
-        message = addToTable(message, getCenteredText("Jeux", '-', ' ', gameNameLength)
-                + getCenteredText("Difficulté", '-', ' ', difficultyLength)
-                + getCenteredText("Score", '-', ' ', scoreLength)
-                + getCenteredText("Nom du joueur", '-', ' ', playerNameLength));
+        message = addToTable(message, centerText("Jeux", '-', ' ', gameNameLength)
+                + centerText("Difficulté", '-', ' ', difficultyLength)
+                + centerText("Score", '-', ' ', scoreLength)
+                + centerText("Nom du joueur", '-', ' ', playerNameLength));
         for (int i = 0; i < stats[0].length; i++) {
             if (stats[0][i].equals(gameID)) {
-                message = addToTable(message, getCenteredText(stats[0][i], ' ', ' ', gameNameLength)
-                        + getCenteredText(stats[1][i], ' ', ' ', difficultyLength)
-                        + getCenteredText(stats[2][i], ' ', ' ', scoreLength)
-                        + getCenteredText(stats[3][i], ' ', ' ', playerNameLength));
+                message = addToTable(message, centerText(stats[0][i], ' ', ' ', gameNameLength)
+                        + centerText(stats[1][i], ' ', ' ', difficultyLength)
+                        + centerText(stats[2][i], ' ', ' ', scoreLength)
+                        + centerText(stats[3][i], ' ', ' ', playerNameLength));
             }
         }
         showMessage("Statistiques", message);
@@ -343,7 +343,7 @@ public class Programme {
         if (!title.equals("")) {
             separator = ' ';
         }
-        System.out.print(getCenteredText(title, '-', separator, minLength));
+        System.out.print(centerText(title, '-', separator, minLength));
         System.out.println("\\");
 
         // Bourage avec des lignes vide pour qu'il y ai au moins minHeight lignes dans la boite
@@ -351,27 +351,27 @@ public class Programme {
         // - une si la division de halfMinHeight à un reste
         for (int i = 0; i < halfMinHeight - lines.length % 2; i++) {
             System.out.print("|");
-            System.out.print(getCenteredText("", ' ', ' ', minLength));
+            System.out.print(centerText("", ' ', ' ', minLength));
             System.out.println("|");
         }
 
         // Lignes au milieu
         for (String str : lines) {
             System.out.print("|");
-            System.out.print(getCenteredText(str, ' ', ' ', minLength));
+            System.out.print(centerText(str, ' ', ' ', minLength));
             System.out.println("|");
         }
 
         // Bourage avec des lignes vide + une si la division de halfMinHeight à un reste
         for (int i = 0; i < halfMinHeight + minHeight % 2; i++) {
             System.out.print("|");
-            System.out.print(getCenteredText("", ' ', ' ', minLength));
+            System.out.print(centerText("", ' ', ' ', minLength));
             System.out.println("|");
         }
 
         // Dernière ligne
         System.out.print("\\");
-        System.out.print(getCenteredText("", '-', minLength));
+        System.out.print(centerText("", '-', minLength));
         System.out.println("/");
     }
 
@@ -419,13 +419,13 @@ public class Programme {
 
     // Retourne la chaine de caractères passé en paramètre centré avec des caractères passé en paramètre
     // Au moins un spacer est retourné de chaque côté du text
-    static String getCenteredText(String text, char spacer, int length) {
-        return getCenteredText(text, spacer, spacer, length);
+    static String centerText(String text, char spacer, int length) {
+        return centerText(text, spacer, spacer, length);
     }
 
     // Retourne la chaine de caractères passé en paramètre centré avec des caractères passé en paramètre
     // Les spacer ne sont pas forcément retournés mais separator est retourné 1 fois de chaque côté du text
-    static String getCenteredText(String text, char spacer, char separator, int length) {
+    static String centerText(String text, char spacer, char separator, int length) {
         String result = "";
         // Longueur du text + 2 pour les 2 separator
         int minimumLength = text.length() + 2;
@@ -481,7 +481,7 @@ public class Programme {
     static String[] readFile(String filePath) {
         try {
             String texte = Lecteur.LireTexte(filePath);
-            return formatTextToWords(texte);
+            return convertTextToWords(texte);
         } catch (IOException err1) {
             showErrorMessage("Erreur lors de la lecture du fichier,", "-> Fichier: " + filePath);
             // On retourne un tableau vide puisqu'une exception a été levée
@@ -505,7 +505,7 @@ public class Programme {
     // Retourne un tableau de mots à partir d'une chaine de caractères
     // sans doublons, sans ponctuation, sans espaces et sans lettres seules
     // (exemple pour "c'était", seulement "était" est ajouté dans le tableau)
-    static String[] formatTextToWords(String text) {
+    static String[] convertTextToWords(String text) {
         String[] mots = new String[0];
         // On met le texte en minuscules
         text = text.toLowerCase();
