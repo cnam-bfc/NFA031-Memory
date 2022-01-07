@@ -82,10 +82,10 @@ public class Programme {
                     int statsMenuCode;
                     do {
                         statsMenuCode = showMenu("Statistiques", "De quel jeu voulez-vous voir les statistiques?", GAMES_NAMES[0], GAMES_NAMES[1], GAMES_NAMES[2], "Retour");
-                        if (statsMenuCode != GAMES_NAMES.length + 1) {
+                        if (statsMenuCode != 4) {
                             showStatsMenu(stats, GAMES_NAMES[statsMenuCode - 1]);
                         }
-                    } while (statsMenuCode != GAMES_NAMES.length + 1);
+                    } while (statsMenuCode != 4);
                 }
                 case 3 ->
                     showSettingsMenu(stats);
@@ -149,6 +149,7 @@ public class Programme {
     // Lance le jeu de série de mots
     // Retourne vrai si tout s'est bien passé
     static boolean launchSerieDeMotsGame(String[][] stats) {
+        String gameName = GAMES_NAMES[0];
         String difficulty = askDifficulty();
         if (difficulty.equals("")) {
             return false;
@@ -157,8 +158,8 @@ public class Programme {
         boolean replay = true;
         while (replay) {
 
-            addStat(stats, GAMES_NAMES[0], difficulty, "0", askString("Quel est votre pseudo?"));
-            showStatsMenu(stats, GAMES_NAMES[0]);
+            addStat(stats, gameName, difficulty, "0", askString("Quel est votre pseudo?"));
+            showStatsMenu(stats, gameName);
             replay = askReplay();
             if (replay && !askReplayWithSameData()) {
                 mots = readText("Extrait_texte");
