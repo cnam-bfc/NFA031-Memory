@@ -460,6 +460,7 @@ public class Programme {
         }
         // Scroll le terminal
         System.out.print("\033[H\033[2J");
+        // On vide le buffer d'écriture dans le terminal si des caractères n'était pas encore affichés
         System.out.flush();
     }
 
