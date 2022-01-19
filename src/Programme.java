@@ -5,9 +5,9 @@ import java.io.IOException;
 public class Programme {
 
     static final String GAME_NAME = "Jeux de Mémoire";
-    static final int TERMINAL_MINLENGTH = 100;
-    static final int TERMINAL_MINHEIGHT = 15;
-    static final int TERMINAL_HEIGHT = 15;
+    static final int TERMINAL_MINLENGTH = 50;
+    static final int TERMINAL_MINHEIGHT = 5;
+    static final int TERMINAL_CLEANUP_HEIGHT = 15;
     static final String[] GAMES_NAMES = {"Série de mots", "Série de nombres", "Liste de paires de mots"};
 
     public static void main(String[] args) {
@@ -139,10 +139,11 @@ public class Programme {
     }
 
     // Lance le jeu de série de mots
-    // Retourne vrai si tout s'est bien passé
+    // Retourne faux si il faut réafficher le menu de sélection des jeux
     static boolean launchSerieDeMotsGame(String[][] stats) {
         String gameName = GAMES_NAMES[0];
         String difficulty = askDifficulty();
+        // Si retour est sélectionné
         if (difficulty.equals("")) {
             return false;
         }
@@ -161,14 +162,14 @@ public class Programme {
     }
 
     // Lance le jeu de série de nombres
-    // Retourne vrai si tout s'est bien passé
+    // Retourne faux si il faut réafficher le menu de sélection des jeux
     static boolean launchSerieDeNombresGame(String[][] stats) {
         devMessage("Série de nombres");
         return false;
     }
 
     // Lance le jeu de paires de mots
-    // Retourne vrai si tout s'est bien passé
+    // Retourne faux si il faut réafficher le menu de sélection des jeux
     static boolean launchPairesDeMotsGame(String[][] stats) {
         devMessage("Paires de mots");
         return false;
@@ -448,7 +449,7 @@ public class Programme {
     // Source: https://stackoverflow.com/a/32295974
     static void clearConsole() {
         // On imprime des retour à la ligne au cas où le scroll ci-dessous ne fonctionne pas
-        for (int i = 0; i < TERMINAL_HEIGHT; i++) {
+        for (int i = 0; i < TERMINAL_CLEANUP_HEIGHT; i++) {
             System.out.println();
         }
         // Scroll le terminal
