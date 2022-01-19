@@ -73,7 +73,7 @@ public class Programme {
     static void showMainMenu(String[][] stats) {
         int menuCode;
         do {
-            menuCode = showMenu("Menu principal", "", "Jouer", "Statistiques", "Paramètres", "Quitter");
+            menuCode = showMenu("Menu principal", "", "Jouer", "Statistiques", "Quitter");
             switch (menuCode) {
                 case 1 ->
                     showGameMenu(stats);
@@ -87,22 +87,15 @@ public class Programme {
                     } while (statsMenuCode != 4);
                 }
                 case 3 ->
-                    showSettingsMenu(stats);
-                case 4 ->
                     showQuitMenu(stats);
             }
-        } while (menuCode != 4);
+        } while (menuCode != 3);
     }
 
     // Affiche le menu des statistiques quand on quitte le programme
     static void showQuitMenu(String[][] stats) {
         clearConsole();
         showBoundingBoxWithContent(GAME_NAME, "À bientôt...");
-    }
-
-    // Affiche le menu des paramètres
-    static void showSettingsMenu(String[][] stats) {
-        devMessage("Paramètres");
     }
 
     // Affiche le menu des statistiques d'un jeu en particulié
