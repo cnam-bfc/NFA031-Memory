@@ -99,7 +99,7 @@ public class Programme {
     }
 
     // Affiche le menu des statistiques d'un jeu en particulié
-    static void showStatsMenu(String[][] stats, String gameID) {
+    static void showStatsMenu(String[][] stats, String gameName) {
         String[] message = new String[0];
         int gameNameLength = getMaximumLength(addToTable(stats[0], "  Jeux  "));
         int difficultyLength = getMaximumLength(addToTable(stats[1], "  Difficulté  "));
@@ -110,7 +110,7 @@ public class Programme {
                 + centerText("Score", '-', ' ', scoreLength)
                 + centerText("Nom du joueur", '-', ' ', playerNameLength));
         for (int i = 0; i < stats[0].length; i++) {
-            if (stats[0][i].equals(gameID)) {
+            if (stats[0][i].equals(gameName)) {
                 message = addToTable(message, centerText(stats[0][i], ' ', ' ', gameNameLength)
                         + centerText(stats[1][i], ' ', ' ', difficultyLength)
                         + centerText(stats[2][i], ' ', ' ', scoreLength)
