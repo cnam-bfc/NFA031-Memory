@@ -147,15 +147,32 @@ public class Programme {
         if (difficulty.equals("")) {
             return false;
         }
-        String[] mots = readText("Extrait_texte");
         boolean replay = true;
         while (replay) {
+            int nbTermes = getNbTermesDifficulty(difficulty);
+            String[] mots = pickRandomWordsFromText("Extrait_texte", difficulty);
+            if (mots.length < nbTermes) {
+                showErrorMessage(gameName + "\n-> Pas assez le mots pour démarrer le jeu");
+                return true;
+            }
 
-            addStat(stats, gameName, difficulty, "0", askString("Quel est votre pseudo?"));
-            showStatsMenu(stats, gameName);
+            for (int i = 0; i < mots.length; i++) {
+                String mot = mots[i];
+                showMessage(gameName, "Mots à mémoriser", "", mot);
+                String saisie = askString("Quel est le mot?");
+                if (!mot.equalsIgnoreCase(saisie)) {
+                    // On sauvegarde les statistiques de la partie et on en profite pour lui afficher
+                    addStat(stats, gameName, difficulty, "0", askString("Quel est votre pseudo?"));
+                    showStatsMenu(stats, gameName);
+                    break;
+                }
+            }
+
+            // On demande au joueur si il veut rejouer
             replay = askReplay();
-            if (replay && !askReplayWithSameData()) {
-                mots = readText("Extrait_texte");
+            // Si il veut rejouer et qu'il veut une difficulté différente, on lui demande la nouvelle difficulté et on la change
+            if (replay && !askReplayWithSameDifficulty()) {
+                difficulty = askDifficulty();
             }
         }
         return true;
@@ -180,26 +197,38 @@ public class Programme {
         return menuCode == 1;
     }
 
-    static boolean askReplayWithSameData() {
-        int menuCode = showMenu("Rejouer", "Voulez-vous rejouer avec les mêmes données?", "Oui", "Non");
+    static boolean askReplayWithSameDifficulty() {
+        int menuCode = showMenu("Rejouer", "Voulez-vous rejouer avec la même difficulté?", "Oui", "Non");
         return menuCode == 1;
     }
 
-    // Retourne la difficulté demandé au joueur
+    // Retourne la difficulté qui est demandé au joueur
+    // Retourne un string vide ("") si retour est selectionné
     static String askDifficulty() {
-        int menuCode = showMenu("Difficulté", "", "Facile", "Normal", "Difficile", "Personnalisé", "Retour");
+        return askDifficulty(true);
+    }
+
+    // Retourne la difficulté qui est demandé au joueur
+    // Retourne un string vide ("") si retour est selectionné
+    static String askDifficulty(boolean backButton) {
+        int menuCode;
+        if (backButton) {
+            menuCode = showMenu("Difficulté", "", "Facile", "Normal", "Difficile", "Personnalisé", "Retour");
+        } else {
+            menuCode = showMenu("Difficulté", "", "Facile", "Normal", "Difficile", "Personnalisé");
+        }
         switch (menuCode) {
             case 1 -> {
                 // Facile
-                return convertDifficultyToString(3, 2, 5);
+                return convertDifficultyToString(10, 3, 5);
             }
             case 2 -> {
                 // Normal
-                return convertDifficultyToString(5, 3, 6);
+                return convertDifficultyToString(20, 4, 7);
             }
             case 3 -> {
                 // Difficile
-                return convertDifficultyToString(7, 4, 10);
+                return convertDifficultyToString(30, 5, 10);
             }
             case 4 -> {
                 // Personnalisé
@@ -448,14 +477,32 @@ public class Programme {
     // Efface le contenu de la console
     // Source: https://stackoverflow.com/a/32295974
     static void clearConsole() {
-        // On imprime des retour à la ligne au cas où le scroll ci-dessous ne fonctionne pas
+        // On imprime des retour à la ligne au cas où le terminal ne supporte pas le scroll ci-dessous
         for (int i = 0; i < TERMINAL_CLEANUP_HEIGHT; i++) {
             System.out.println();
         }
-        // Scroll le terminal
+        // On scroll le terminal
         System.out.print("\033[H\033[2J");
         // On vide le buffer d'écriture dans le terminal si des caractères n'était pas encore affichés
         System.out.flush();
+    }
+
+    // Retourne la liste des mots du texte correspondant à la difficulté
+    static String[] pickRandomWordsFromText(String fileName, String difficulty) {
+        String[] result = new String[0];
+        // Parcours les mots du texte qui on été mélangés et on les ajoute au résultat si il correspondent à la difficulté
+        int nbTermes = getNbTermesDifficulty(difficulty);
+        int min = getMinLengthDifficulty(difficulty);
+        int max = getMaxLengthDifficulty(difficulty);
+        for (String word : shuffleTable(readText(fileName))) {
+            if (result.length >= nbTermes) {
+                break;
+            }
+            if (word.length() >= min && word.length() <= max) {
+                result = addToTable(result, word);
+            }
+        }
+        return result;
     }
 
     // Cherche le fichier dans plusieurs dossiers et le lit si il est trouvé
@@ -491,11 +538,14 @@ public class Programme {
     static boolean fileExists(String filePath) {
         try {
             Lecteur.LireTexte(filePath);
+            // Pas d'exception déclanché donc le fichier existe
             return true;
         } catch (FileNotFoundException ex) {
+            // Le fichier n'existe pas
             return false;
         } catch (IOException ex) {
-            return false;
+            // Le fichier existe mais erreur de lecture
+            return true;
         }
     }
 
@@ -549,6 +599,17 @@ public class Programme {
         }
 
         return mots;
+    }
+
+    // Retourne le tableau passé en paramètre mélangé
+    static String[] shuffleTable(String[] table) {
+        for (int i = 0; i < table.length; i++) {
+            int j = generateRandomInt(0, table.length - 1);
+            String temp = table[j];
+            table[j] = table[i];
+            table[i] = temp;
+        }
+        return table;
     }
 
     // Retourne vrai si la chaine de caractères est contenu dans le tableau
