@@ -27,26 +27,6 @@ public class Programme {
         showMainMenu(stats);
     }
 
-    static String[][] initStats() {
-        String[][] stats = new String[4][];
-        // Numéro du jeu de la partie
-        stats[0] = new String[0];
-        // Difficulté de la partie
-        stats[1] = new String[0];
-        // Score de la partie
-        stats[2] = new String[0];
-        // Nom du joueur
-        stats[3] = new String[0];
-        return stats;
-    }
-
-    static void addStat(String[][] stats, String gameName, String difficulty, String score, String playerName) {
-        stats[0] = addToTable(stats[0], gameName);
-        stats[1] = addToTable(stats[1], difficulty);
-        stats[2] = addToTable(stats[2], score);
-        stats[3] = addToTable(stats[3], playerName);
-    }
-
     // Affiche un faux écran de chargement, plus speed est proche de 0 plus le chargement est rapide
     static void showLoadingScreen(int speed) {
         if (speed <= 0) {
@@ -242,6 +222,26 @@ public class Programme {
                 return "";
             }
         }
+    }
+
+    static void addStat(String[][] stats, String gameName, String difficulty, String score, String playerName) {
+        stats[0] = addToTable(stats[0], gameName);
+        stats[1] = addToTable(stats[1], difficulty);
+        stats[2] = addToTable(stats[2], score);
+        stats[3] = addToTable(stats[3], playerName);
+    }
+
+    static String[][] initStats() {
+        String[][] stats = new String[4][];
+        // Numéro du jeu de la partie
+        stats[0] = new String[0];
+        // Difficulté de la partie
+        stats[1] = new String[0];
+        // Score de la partie
+        stats[2] = new String[0];
+        // Nom du joueur
+        stats[3] = new String[0];
+        return stats;
     }
 
     // Affiche un menu à l'utilisateur avec un titre, un sous-titre et les choix passés en paramètre
