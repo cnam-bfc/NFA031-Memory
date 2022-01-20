@@ -157,10 +157,10 @@ public class Programme {
             }
 
             for (int i = 0; i < mots.length; i++) {
-                String mot = mots[i];
-                showMessage(gameName, "Mots à mémoriser", "", mot);
+                String newMot = mots[i];
+                showMessage(gameName, "Mots à mémoriser", "", newMot);
                 String saisie = askString("Quel est le mot?");
-                if (!mot.equalsIgnoreCase(saisie)) {
+                if (!newMot.equalsIgnoreCase(saisie)) {
                     // On sauvegarde les statistiques de la partie et on en profite pour lui afficher
                     addStat(stats, gameName, difficulty, "0", askString("Quel est votre pseudo?"));
                     showStatsMenu(stats, gameName);
@@ -244,26 +244,6 @@ public class Programme {
         }
     }
 
-    // Converti la difficulté en String
-    static String convertDifficultyToString(int nbTermes, int minLength, int maxLength) {
-        return nbTermes + "/" + minLength + "/" + maxLength;
-    }
-
-    // Retourne le nombre de termes de la difficulté
-    static int getNbTermesDifficulty(String difficulty) {
-        return Integer.parseInt(difficulty.split("/")[0]);
-    }
-
-    // Retourne le minimum de la longueur des termes de la difficulté
-    static int getMinLengthDifficulty(String difficulty) {
-        return Integer.parseInt(difficulty.split("/")[1]);
-    }
-
-    // Retourne le maximum de la longueur des termes de la difficulté
-    static int getMaxLengthDifficulty(String difficulty) {
-        return Integer.parseInt(difficulty.split("/")[2]);
-    }
-
     // Affiche un menu à l'utilisateur avec un titre, un sous-titre et les choix passés en paramètre
     // Retourne le numéro du choix de l'utilisateur
     static int showMenu(String title, String subTitle, String... choices) {
@@ -333,6 +313,39 @@ public class Programme {
         }
     }
 
+    // Affiche un message d'avertissement à l'utilisateur
+    static void showWarningMessage(String... message) {
+        showMessage("ATTENTION", message);
+    }
+
+    // Affiche un message d'erreur à l'utilisateur
+    static void showErrorMessage(String... message) {
+        showMessage("ERREUR", message);
+    }
+
+    // Affiche un message à l'utilisateur avec un cadre muni d'un titre et le cadre fera une longueur et hauteur par défaut défini par des constantes
+    static void showMessage(String title, String... message) {
+        showMessage(title, TERMINAL_MINLENGTH, message);
+    }
+
+    // Affiche un message à l'utilisateur avec un cadre muni d'un titre et le cadre fera au moins minLength de longueur et une hauteur par défaut défini dans une constante
+    static void showMessage(String title, int minLength, String... message) {
+        showMessage(title, minLength, TERMINAL_MINHEIGHT, message);
+    }
+
+    // Affiche un message à l'utilisateur avec un cadre muni d'un titre et le cadre fera au moins minLength de longueur et minHeight de hauteur
+    static void showMessage(String title, int minLength, int minHeight, String... message) {
+        try {
+            clearConsole();
+            message = addToTable(message, "");
+            message = addToTable(message, "Appuyez sur Entrée pour continuer...");
+            showBoundingBoxWithContent(title, minLength, minHeight, message);
+            EConsole.lireString();
+        } catch (IOException ex) {
+            System.out.println("ERROR");
+        }
+    }
+
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
     static void showBoundingBoxWithContent(String title, String... lines) {
         // On défini la longueur par défaut si aucune n'est spécifié
@@ -347,14 +360,17 @@ public class Programme {
 
     // Affiche chaque élément du tableau sur une ligne indépendante, le tout entouré d'un cadre et si indiqué un titre
     static void showBoundingBoxWithContent(String title, int minLength, int minHeight, String... lines) {
-        String[] tableauTemp = enlargeTable(lines);
         // " " Pour avoir au moins un tiret (spacer) de chaque côté du titre si il est le plus grand par rapport aux Strings de lines
         // car les spacer ne sont pas forcément retourné dans la méthode getCenteredText() qui est utilisé plus tard dans cette méthode
-        tableauTemp[tableauTemp.length - 1] = " " + title + " ";
+        String[] tableauTemp = addToTable(lines, " " + title + " ");
+
+        // + 2 pour avoir au moins 1 spacer de chaque côté du titre
         int maxLength = getMaximumLength(tableauTemp) + 2;
+
         if (maxLength > minLength) {
             minLength = maxLength;
         }
+
         int maxHeight = lines.length;
         if (maxHeight > minHeight) {
             minHeight = maxHeight;
@@ -397,48 +413,6 @@ public class Programme {
         System.out.println("/");
     }
 
-    // Met le programme en pause pendant x ms
-    static void sleep(int millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ex) {
-            showErrorMessage("Attendre", "-> Impossible d'attendre " + millis + "ms");
-        }
-    }
-
-    // Affiche un message d'avertissement à l'utilisateur
-    static void showWarningMessage(String... message) {
-        showMessage("ATTENTION", message);
-    }
-
-    // Affiche un message d'erreur à l'utilisateur
-    static void showErrorMessage(String... message) {
-        showMessage("ERREUR", message);
-    }
-
-    // Affiche un message à l'utilisateur
-    static void showMessage(String title, String... message) {
-        showMessage(title, TERMINAL_MINLENGTH, message);
-    }
-
-    // Affiche un message à l'utilisateur
-    static void showMessage(String title, int minLength, String... message) {
-        showMessage(title, minLength, TERMINAL_MINHEIGHT, message);
-    }
-
-    // Affiche un message à l'utilisateur
-    static void showMessage(String title, int minLength, int minHeight, String... message) {
-        try {
-            clearConsole();
-            message = addToTable(message, "");
-            message = addToTable(message, "Appuyez sur Entrée pour continuer...");
-            showBoundingBoxWithContent(title, minLength, minHeight, message);
-            EConsole.lireString();
-        } catch (IOException ex) {
-            System.out.println("ERROR");
-        }
-    }
-
     // Retourne la chaine de caractères passé en paramètre centré avec des caractères passé en paramètre
     // Au moins un spacer est retourné de chaque côté du text
     static String centerText(String text, char spacer, int length) {
@@ -446,10 +420,11 @@ public class Programme {
     }
 
     // Retourne la chaine de caractères passé en paramètre centré avec des caractères passé en paramètre
-    // Les spacer ne sont pas forcément retournés mais separator est retourné 1 fois de chaque côté du text
+    // Les spacer ne sont pas forcément retournés mais separator est obligatoirement retourné 1 fois de chaque côté du text
     static String centerText(String text, char spacer, char separator, int length) {
         String result = "";
-        // Longueur du text + 2 pour les 2 separator
+
+        // Longueur du text + 2 pour les 2 separator (qui doivent êtres retourn obligatoirement)
         int minimumLength = text.length() + 2;
         if (minimumLength > length) {
             length = minimumLength;
@@ -477,10 +452,11 @@ public class Programme {
     // Efface le contenu de la console
     // Source: https://stackoverflow.com/a/32295974
     static void clearConsole() {
-        // On imprime des retour à la ligne au cas où le terminal ne supporte pas le scroll ci-dessous
+        // On imprime des retour à la ligne au cas où le terminal ne supporte pas le scroll ci-après
         for (int i = 0; i < TERMINAL_CLEANUP_HEIGHT; i++) {
             System.out.println();
         }
+
         // On scroll le terminal
         System.out.print("\033[H\033[2J");
         // On vide le buffer d'écriture dans le terminal si des caractères n'était pas encore affichés
@@ -490,28 +466,37 @@ public class Programme {
     // Retourne la liste des mots du texte correspondant à la difficulté
     static String[] pickRandomWordsFromText(String fileName, String difficulty) {
         String[] result = new String[0];
-        // Parcours les mots du texte qui on été mélangés et on les ajoute au résultat si il correspondent à la difficulté
+
+        // On récupère les caractéristiques de la difficulté
         int nbTermes = getNbTermesDifficulty(difficulty);
         int min = getMinLengthDifficulty(difficulty);
         int max = getMaxLengthDifficulty(difficulty);
+
+        // On parcours les mots du texte qui on été mélangés et on les ajoute au résultat si ils correspondent à la difficulté
         for (String word : shuffleTable(readText(fileName))) {
+            // On arrête d'ajouter des mots si on a assez de mots pour la difficulté choisi
             if (result.length >= nbTermes) {
                 break;
             }
+
+            // On ajoute le mot si il correspond aux caractéristiques de difficulté
             if (word.length() >= min && word.length() <= max) {
                 result = addToTable(result, word);
             }
         }
+
         return result;
     }
 
     // Cherche le fichier dans plusieurs dossiers et le lit si il est trouvé
     // Retourne un tableau des mots du fichier
-    // Retourne un tableau de 0 valeurs si aucun fichiers n'est trouvé
+    // Retourne un tableau de 0 valeurs si le fichier n'est pas trouvé
     static String[] readText(String fileName) {
+        // Dossiers possibles où l'on peut trouver le fichier texte dont le nom est passé en paramètre
         String[] folders = {".\\", ".\\src\\", ".\\textes\\"};
 
         for (String folder : folders) {
+            // Si le fichier existe, on lit le fichier et on retourne les mots du fichier sans doublons, ponctuation, ect...
             if (fileExists(folder + fileName + ".txt")) {
                 return readFile(folder + fileName + ".txt");
             }
@@ -520,14 +505,14 @@ public class Programme {
         return new String[0];
     }
 
-    // Retourne un tableau des mots d'un fichier texte
+    // Retourne le tableau des mots du fichier texte sans doublons, ni ponctuations, ni de lettres seules
     // Retourne un tableau de 0 valeurs si une exception est levée
     static String[] readFile(String filePath) {
         try {
             String texte = Lecteur.LireTexte(filePath);
             return convertTextToWords(texte);
         } catch (IOException err1) {
-            showErrorMessage("Erreur lors de la lecture du fichier,", "-> Fichier: " + filePath);
+            showErrorMessage("Erreur lors de la lecture du fichier,", "-> Fichier: " + filePath, "-> Erreur: " + err1.getMessage());
             // On retourne un tableau vide puisqu'une exception a été levée
             return new String[0];
         }
@@ -556,7 +541,8 @@ public class Programme {
         String[] mots = new String[0];
         // On met le texte en minuscules
         text = text.toLowerCase();
-        // On concatène les caractères les uns à la suite des autre dans cette chaine de caractères
+
+        // On va concaténer les caractères les uns à la suite des autres dans cette chaine de caractères
         String mot = "";
 
         // On parcours le texte caractère par caractère
@@ -594,6 +580,8 @@ public class Programme {
                 if (mot.length() > 1 && !isIncludedInTable(mot, mots)) {
                     mots = addToTable(mots, mot);
                 }
+
+                // Le dernier caractère du mot a été atteint donc on réinitialise mot pour le prochain mot
                 mot = "";
             }
         }
@@ -643,7 +631,7 @@ public class Programme {
         return result;
     }
 
-    // Retourne la longueur la plus meximal des chaines de caractères contenu dans le tableau
+    // Retourne la longueur maximal des chaines de caractères contenu dans le tableau
     static int getMaximumLength(String[] table) {
         int max = 0;
 
@@ -656,9 +644,38 @@ public class Programme {
         return max;
     }
 
-    // Retourne un entier pseudo-aléatoirement entre min (inclus) et max (inclus)
+    // Met le programme en pause pendant x ms
+    static void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ex) {
+            showErrorMessage("Attendre", "-> Impossible d'attendre " + millis + "ms", "-> Erreur: " + ex.getMessage());
+        }
+    }
+
+    // Retourne un entier pseudo-aléatoire entre min (inclus) et max (inclus)
     // Source: https://stackoverflow.com/a/363732
     static int generateRandomInt(int min, int max) {
         return min + (int) (Math.random() * (max - min + 1));
+    }
+
+    // Converti la difficulté en String
+    static String convertDifficultyToString(int nbTermes, int minLength, int maxLength) {
+        return nbTermes + "/" + minLength + "/" + maxLength;
+    }
+
+    // Retourne le nombre de termes de la difficulté
+    static int getNbTermesDifficulty(String difficulty) {
+        return Integer.parseInt(difficulty.split("/")[0]);
+    }
+
+    // Retourne le minimum de la longueur des termes de la difficulté
+    static int getMinLengthDifficulty(String difficulty) {
+        return Integer.parseInt(difficulty.split("/")[1]);
+    }
+
+    // Retourne le maximum de la longueur des termes de la difficulté
+    static int getMaxLengthDifficulty(String difficulty) {
+        return Integer.parseInt(difficulty.split("/")[2]);
     }
 }
