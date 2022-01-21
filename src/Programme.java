@@ -5,12 +5,13 @@ import java.io.IOException;
 public class Programme {
 
     static final String GAME_NAME = "Jeux de Mémoire";
-    static final int TERMINAL_MINLENGTH = 50;
-    static final int TERMINAL_MINHEIGHT = 5;
+    static final int TERMINAL_MINLENGTH = 75;
+    static final int TERMINAL_MINHEIGHT = 9;
     static final int TERMINAL_CLEANUP_HEIGHT = 15;
     static final String[] GAMES_NAMES = {"Série de mots", "Série de nombres", "Liste de paires de mots"};
 
     public static void main(String[] args) {
+        // Au lancement du programme on démarre le jeu
         startGame();
     }
 
@@ -22,96 +23,115 @@ public class Programme {
     // Démarre le jeu
     static void startGame() {
         // TODO Augmenter cette valeur
-        showLoadingScreen(100);
+        // Au lancement du programme on affiche un faux écran de chargement
+        showLoadingScreen(100, 25);
+
+        // Après on initialise les statistiques
         String[][] stats = initStats();
+
+        // Enfin on affiche le menu principal et si Quitter est sélectionné on reprend la main donc le programme se termine
         showMainMenu(stats);
     }
 
     // Affiche un faux écran de chargement, plus speed est proche de 0 plus le chargement est rapide
-    static void showLoadingScreen(int speed) {
-        if (speed <= 0) {
+    static void showLoadingScreen(int speed, int length) {
+        // On vérifie les paramètres en entrée
+        if (speed < 0) {
             showErrorMessage("Écran de chargement", "-> Speed doit être supérieur à 0");
             return;
+        } else if (length < 1) {
+            showErrorMessage("Écran de chargement", "-> Length doit être supérieur à 0");
+            return;
         }
-        for (int i = 0; i < 24; i++) {
+
+        // Boucle des écrans de chargement
+        for (int i = 0; i < length; i++) {
+            // On efface la console
             clearConsole();
+
             String progressBar = "[";
+            // Bourrage avant le curseur de chargement
             for (int j = 0; j < i; j++) {
                 progressBar += "=";
             }
+
+            // Curseur
             progressBar += "*";
-            for (int j = 24; j > i; j--) {
+
+            // Bourrage après le curseur de chargement
+            for (int j = length - 1; j > i; j--) {
                 progressBar += " ";
             }
             progressBar += "]";
+
+            // On affiche l'écran de chargement sans titre (1er argument), avec ce contenu (chaque argument est une ligne)
             showBoundingBoxWithContent("", GAME_NAME, "", "", "", "Chargement...", "", progressBar);
+
+            // On attend un temps aléatoire entre 0 et speed ms pour séparer les faux écrans de chargement dans le temps
             sleep(generateRandomInt(0, speed));
         }
     }
 
     // Affiche le menu principal
     static void showMainMenu(String[][] stats) {
+        // Stocke la valeur de l'option sélectionné dans le menu qui sera affiché à l'utilisateur
         int menuCode;
+
         do {
             menuCode = showMenu("Menu principal", "", "Jouer", "Statistiques", "Quitter");
+
+            // On effectue l'option selectionné par l'utilisateur 
             switch (menuCode) {
+                // Jouer selectionné
                 case 1 ->
                     showGameMenu(stats);
+                // Statistiques selectionné
                 case 2 -> {
                     int statsMenuCode;
+
                     do {
-                        statsMenuCode = showMenu("Statistiques", "De quel jeu voulez-vous voir les statistiques?", GAMES_NAMES[0], GAMES_NAMES[1], GAMES_NAMES[2], "Retour");
-                        if (statsMenuCode != 4) {
-                            showStatsMenu(stats, GAMES_NAMES[statsMenuCode - 1]);
+                        statsMenuCode = showMenu("Statistiques", "De quel jeu voulez-vous voir les statistiques?", "Tous", GAMES_NAMES[0], GAMES_NAMES[1], GAMES_NAMES[2], "Retour");
+
+                        switch (statsMenuCode) {
+                            // Tous selectionné
+                            case 1 ->
+                                showStats(stats);
+                            // Un des jeux selectionné
+                            case 2, 3, 4 ->
+                                showStats(stats, GAMES_NAMES[statsMenuCode - 2]);
                         }
-                    } while (statsMenuCode != 4);
+
+                        // Tant que 5 (retour) n'est pas sélectionné
+                    } while (statsMenuCode != 5);
                 }
+                // Quitter selectionné
                 case 3 ->
-                    showQuitMenu(stats);
+                    showQuitMessage();
             }
+
+            // Tant que 3 (Quitter) n'est pas selectionné
         } while (menuCode != 3);
-    }
-
-    // Affiche le menu des statistiques quand on quitte le programme
-    static void showQuitMenu(String[][] stats) {
-        clearConsole();
-        showBoundingBoxWithContent(GAME_NAME, "À bientôt...");
-    }
-
-    // Affiche le menu des statistiques d'un jeu en particulié
-    static void showStatsMenu(String[][] stats, String gameName) {
-        String[] message = new String[0];
-        int gameNameLength = getMaximumLength(addToTable(stats[0], "  Jeux  "));
-        int difficultyLength = getMaximumLength(addToTable(stats[1], "  Difficulté  "));
-        int scoreLength = getMaximumLength(addToTable(stats[2], "  Score  "));
-        int playerNameLength = getMaximumLength(addToTable(stats[3], "  Nom du joueur  "));
-        message = addToTable(message, centerText("Jeux", '-', ' ', gameNameLength)
-                + centerText("Difficulté", '-', ' ', difficultyLength)
-                + centerText("Score", '-', ' ', scoreLength)
-                + centerText("Nom du joueur", '-', ' ', playerNameLength));
-        for (int i = 0; i < stats[0].length; i++) {
-            if (stats[0][i].equals(gameName)) {
-                message = addToTable(message, centerText(stats[0][i], ' ', ' ', gameNameLength)
-                        + centerText(stats[1][i], ' ', ' ', difficultyLength)
-                        + centerText(stats[2][i], ' ', ' ', scoreLength)
-                        + centerText(stats[3][i], ' ', ' ', playerNameLength));
-            }
-        }
-        showMessage("Statistiques", message);
     }
 
     // Affiche le menu de sélection des jeux
     static void showGameMenu(String[][] stats) {
         boolean showAgain = true;
+
+        // Affiche le menu tant que Retour n'est pas selectionné
         while (showAgain) {
             int menuCode = showMenu("Choix du jeu", "", GAMES_NAMES[0], GAMES_NAMES[1], GAMES_NAMES[2], "Retour");
+
             switch (menuCode) {
+                // Série de mots selectionné
                 case 1 ->
                     showAgain = !launchSerieDeMotsGame(stats);
+                // Série de nombres selectionné
                 case 2 ->
                     showAgain = !launchSerieDeNombresGame(stats);
+                // Paires de mots selectionné
                 case 3 ->
                     showAgain = !launchPairesDeMotsGame(stats);
+                // Retour selectionné
                 case 4 ->
                     showAgain = false;
             }
@@ -123,30 +143,89 @@ public class Programme {
     static boolean launchSerieDeMotsGame(String[][] stats) {
         String gameName = GAMES_NAMES[0];
         String difficulty = askDifficulty();
-        // Si retour est sélectionné
+
+        // Si Retour est sélectionné
         if (difficulty.equals("")) {
+            // On dit à la fonction appelante que retour à été sélectionné
             return false;
         }
-        boolean replay = true;
-        while (replay) {
+
+        boolean replay;
+        do {
             int nbTermes = getNbTermesDifficulty(difficulty);
+            // On récupère des mots aléatoires issue du texte Extrait_texte qui correspondent à la difficulté
             String[] mots = pickRandomWordsFromText("Extrait_texte", difficulty);
+            // Si il n'y a pas assez de mots on arrête le jeu
             if (mots.length < nbTermes) {
-                showErrorMessage(gameName + "\n-> Pas assez le mots pour démarrer le jeu");
-                return true;
+                showErrorMessage(gameName, "-> Pas assez le mots pour démarrer le jeu");
+                // On dit à la fonction appelante que "retour" a été sélectionné donc le menu de sélection des jeux va se réafficher
+                return false;
             }
 
-            for (int i = 0; i < mots.length; i++) {
-                String newMot = mots[i];
-                showMessage(gameName, "Mots à mémoriser", "", newMot);
-                String saisie = askString("Quel est le mot?");
-                if (!newMot.equalsIgnoreCase(saisie)) {
-                    // On sauvegarde les statistiques de la partie et on en profite pour lui afficher
-                    addStat(stats, gameName, difficulty, "0", askString("Quel est votre pseudo?"));
-                    showStatsMenu(stats, gameName);
+            // Score de la partie en cours
+            int score = 0;
+            // True si on veut arrêter la partie en cours
+            boolean stopGame = false;
+
+            // Pour chaque round de la partie
+            for (int i = 1; i <= mots.length; i++) {
+                // Si la partie a demandé a être arrêter, on ne commence pas les prochains rounds
+                if (stopGame) {
                     break;
                 }
+
+                String memorizeTitle;
+                // Texte différent si on est au premier round et qu'il y a seulement 1 mot à mémoriser
+                if (i == 0) {
+                    memorizeTitle = "Mot à mémoriser";
+                } else {
+                    memorizeTitle = "Mots à mémoriser";
+                }
+
+                String[] wordsToMemorize = new String[0];
+
+                // On fait la liste des mots à deviner dans l'ordre
+                for (int j = 0; j < i; j++) {
+                    wordsToMemorize = addOnBottomOfTable(wordsToMemorize, mots[j]);
+                }
+
+                // On affiche les mots à deviner à l'utilisateur + un titre sépéré des mots par une ligne vide
+                showMessage(gameName, addOnTopOfTable(addOnTopOfTable(wordsToMemorize, ""), memorizeTitle));
+
+                // On demande à l'utilisateur de restituer les mots à mémoriser un par un
+                for (int j = 0; j < i; j++) {
+                    String[] wordsMemorized = new String[0];
+
+                    // On fait la liste des mots qu'il a déjà correctement restitué
+                    for (int k = 0; k < j; k++) {
+                        wordsMemorized = addOnBottomOfTable(wordsMemorized, mots[k]);
+                    }
+
+                    // On ajoute une question qui sera afficher à l'utilisateur pour lui demander de restituer le nième mot
+                    wordsMemorized = addOnBottomOfTable(wordsMemorized, "Quel est le " + convertIntToFrenchString(j + 1) + " mot?");
+
+                    // On stocke ce qu'a répondu l'utilisateur
+                    String saisie = askString(gameName, wordsMemorized);
+
+                    // Si le mot restitué n'est pas correct, on arrête la partie en cours
+                    if (!mots[j].equalsIgnoreCase(saisie)) {
+                        stopGame = true;
+                        break;
+                    }
+                }
+
+                // On augmente le score de l'utilisateur
+                score++;
             }
+
+            // On demande le pseudo de l'utilisateur à inscrire dans les statistiques
+            String pseudo = askString("Statistiques - " + gameName, "Quel est votre pseudo?");
+
+            // On sauvegarde les statistiques de la partie en cours
+            addStat(stats, gameName, difficulty, score + "", pseudo);
+
+            // On affiche les statistiques de la partie terminé au joueur
+            showMessage("Statistiques - " + gameName, "Joueur", pseudo, "", "Difficulté", difficulty, "", "Score", score + "");
 
             // On demande au joueur si il veut rejouer
             replay = askReplay();
@@ -154,7 +233,9 @@ public class Programme {
             if (replay && !askReplayWithSameDifficulty()) {
                 difficulty = askDifficulty();
             }
-        }
+        } while (replay);
+
+        // On dit à la fonction appelante que retour n'a pas été sélectionné
         return true;
     }
 
@@ -170,6 +251,76 @@ public class Programme {
     static boolean launchPairesDeMotsGame(String[][] stats) {
         devMessage("Paires de mots");
         return false;
+    }
+
+    // Affiche les statistiques d'un jeu en particulié
+    static void showStats(String[][] stats, String gameName) {
+        String[] message = new String[0];
+
+        int gameNameLength = getMaximumLength(addOnBottomOfTable(stats[0], "  Jeux  "));
+        int difficultyLength = getMaximumLength(addOnBottomOfTable(stats[1], "  Difficulté  "));
+        int scoreLength = getMaximumLength(addOnBottomOfTable(stats[2], "  Score  "));
+        int playerNameLength = getMaximumLength(addOnBottomOfTable(stats[3], "  Nom du joueur  "));
+
+        message = addOnBottomOfTable(message, centerText("Jeux", '-', ' ', gameNameLength)
+                + centerText("Difficulté", '-', ' ', difficultyLength)
+                + centerText("Score", '-', ' ', scoreLength)
+                + centerText("Nom du joueur", '-', ' ', playerNameLength));
+
+        for (int i = 0; i < stats[0].length; i++) {
+            if (stats[0][i].equals(gameName)) {
+                message = addOnBottomOfTable(message, centerText(stats[0][i], ' ', ' ', gameNameLength)
+                        + centerText(stats[1][i], ' ', ' ', difficultyLength)
+                        + centerText(stats[2][i], ' ', ' ', scoreLength)
+                        + centerText(stats[3][i], ' ', ' ', playerNameLength));
+            }
+        }
+
+        showMessage("Statistiques", message);
+    }
+
+    // Affiche les statistiques de tous les jeux
+    static void showStats(String[][] stats) {
+        String[] message = new String[0];
+
+        int gameNameLength = getMaximumLength(addOnBottomOfTable(stats[0], "  Jeux  "));
+        int difficultyLength = getMaximumLength(addOnBottomOfTable(stats[1], "  Difficulté  "));
+        int scoreLength = getMaximumLength(addOnBottomOfTable(stats[2], "  Score  "));
+        int playerNameLength = getMaximumLength(addOnBottomOfTable(stats[3], "  Nom du joueur  "));
+
+        message = addOnBottomOfTable(message, centerText("Jeux", '-', ' ', gameNameLength)
+                + centerText("Difficulté", '-', ' ', difficultyLength)
+                + centerText("Score", '-', ' ', scoreLength)
+                + centerText("Nom du joueur", '-', ' ', playerNameLength));
+
+        for (int i = 0; i < stats[0].length; i++) {
+            message = addOnBottomOfTable(message, centerText(stats[0][i], ' ', ' ', gameNameLength)
+                    + centerText(stats[1][i], ' ', ' ', difficultyLength)
+                    + centerText(stats[2][i], ' ', ' ', scoreLength)
+                    + centerText(stats[3][i], ' ', ' ', playerNameLength));
+        }
+
+        showMessage("Statistiques", message);
+    }
+
+    static void addStat(String[][] stats, String gameName, String difficulty, String score, String playerName) {
+        stats[0] = addOnBottomOfTable(stats[0], gameName);
+        stats[1] = addOnBottomOfTable(stats[1], difficulty);
+        stats[2] = addOnBottomOfTable(stats[2], score);
+        stats[3] = addOnBottomOfTable(stats[3], playerName);
+    }
+
+    static String[][] initStats() {
+        String[][] stats = new String[4][];
+        // Numéro du jeu de la partie
+        stats[0] = new String[0];
+        // Difficulté de la partie
+        stats[1] = new String[0];
+        // Score de la partie
+        stats[2] = new String[0];
+        // Nom du joueur
+        stats[3] = new String[0];
+        return stats;
     }
 
     static boolean askReplay() {
@@ -212,9 +363,9 @@ public class Programme {
             }
             case 4 -> {
                 // Personnalisé
-                int nbTermes = askInteger("Saisissez le nombre de termes désiré", 1, 100);
-                int minLength = askInteger("Saisissez le minimum de caractères d'un terme", 1, 10);
-                int maxLength = askInteger("Saisissez le maximum de caractères d'un terme", minLength, 30);
+                int nbTermes = askInteger("Difficulté", 1, 100, "Saisissez le nombre de termes désiré");
+                int minLength = askInteger("Difficulté", 1, 10, "Saisissez le minimum de caractères d'un terme");
+                int maxLength = askInteger("Difficulté", minLength, 30, "Saisissez le maximum de caractères d'un terme");
                 return convertDifficultyToString(nbTermes, minLength, maxLength);
             }
             default -> {
@@ -222,26 +373,6 @@ public class Programme {
                 return "";
             }
         }
-    }
-
-    static void addStat(String[][] stats, String gameName, String difficulty, String score, String playerName) {
-        stats[0] = addToTable(stats[0], gameName);
-        stats[1] = addToTable(stats[1], difficulty);
-        stats[2] = addToTable(stats[2], score);
-        stats[3] = addToTable(stats[3], playerName);
-    }
-
-    static String[][] initStats() {
-        String[][] stats = new String[4][];
-        // Numéro du jeu de la partie
-        stats[0] = new String[0];
-        // Difficulté de la partie
-        stats[1] = new String[0];
-        // Score de la partie
-        stats[2] = new String[0];
-        // Nom du joueur
-        stats[3] = new String[0];
-        return stats;
     }
 
     // Affiche un menu à l'utilisateur avec un titre, un sous-titre et les choix passés en paramètre
@@ -252,11 +383,11 @@ public class Programme {
             clearConsole();
             String[] lines = new String[0];
             if (!subTitle.equals("")) {
-                lines = addToTable(lines, subTitle);
+                lines = addOnBottomOfTable(lines, subTitle);
             }
             for (int i = 0; i < choices.length; i++) {
                 String choice = choices[i];
-                lines = addToTable(lines, i + 1 + ". " + choice);
+                lines = addOnBottomOfTable(lines, i + 1 + ". " + choice);
             }
             showBoundingBoxWithContent(title, lines);
             System.out.print("Choix > ");
@@ -272,45 +403,51 @@ public class Programme {
     }
 
     // Retourne la chaine de caractères saisi par l'utilisateur
-    static String askString(String question) {
+    static String askString(String title, String... lines) {
         try {
             clearConsole();
-            showBoundingBoxWithContent("Demande de chaine de caractères", question);
+            showBoundingBoxWithContent(title, lines);
             System.out.print("Saisie > ");
             return EConsole.lireString();
         } catch (IOException ex) {
-            showErrorMessage("Demande de chaine de caractères", "-> Impossible de lire la chaine de caractères, veuillez réessayer");
-            return askString(question);
+            showErrorMessage("", "-> Impossible de lire la chaine de caractères, veuillez réessayer");
+            return askString(title, lines);
         }
     }
 
     // Retourne l'entier saisi par l'utilisateur
     // L'entier saisi doit être compris entre min (inclus) et max (inclus)
-    static int askInteger(String question, int min, int max) {
+    static int askInteger(String title, int min, int max, String... lines) {
         int integer;
         do {
-            integer = askInteger(question);
+            integer = askInteger(title, lines);
             if (integer < min || integer > max) {
-                showWarningMessage("Demande d'entier", "-> Veuillez saisir un entier entre " + min + " et " + max);
+                showWarningMessage("", "-> Veuillez saisir un entier entre " + min + " et " + max);
             }
         } while (integer < min || integer > max);
         return integer;
     }
 
     // Retourne l'entier saisi par l'utilisateur
-    static int askInteger(String question) {
+    static int askInteger(String title, String... lines) {
         try {
             clearConsole();
-            showBoundingBoxWithContent("Demande d'entier", question);
+            showBoundingBoxWithContent(title, lines);
             System.out.print("Saisie > ");
             return EConsole.lireInt();
         } catch (NumberFormatException ex) {
-            showWarningMessage("Demande d'entier", "-> Veuillez saisir un entier");
-            return askInteger(question);
+            showWarningMessage("", "-> Veuillez saisir un entier");
+            return askInteger(title, lines);
         } catch (IOException ex) {
-            showErrorMessage("Demande d'entier", "-> Impossible de lire l'entier, veuillez réessayer");
-            return askInteger(question);
+            showErrorMessage("", "-> Impossible de lire l'entier, veuillez réessayer");
+            return askInteger(title, lines);
         }
+    }
+
+    // Affiche un message d'au revoir quand on quitte le programme
+    static void showQuitMessage() {
+        clearConsole();
+        showBoundingBoxWithContent(GAME_NAME, "À bientôt...");
     }
 
     // Affiche un message d'avertissement à l'utilisateur
@@ -337,8 +474,8 @@ public class Programme {
     static void showMessage(String title, int minLength, int minHeight, String... message) {
         try {
             clearConsole();
-            message = addToTable(message, "");
-            message = addToTable(message, "Appuyez sur Entrée pour continuer...");
+            message = addOnBottomOfTable(message, "");
+            message = addOnBottomOfTable(message, "Appuyez sur Entrée pour continuer...");
             showBoundingBoxWithContent(title, minLength, minHeight, message);
             EConsole.lireString();
         } catch (IOException ex) {
@@ -362,7 +499,7 @@ public class Programme {
     static void showBoundingBoxWithContent(String title, int minLength, int minHeight, String... lines) {
         // " " Pour avoir au moins un tiret (spacer) de chaque côté du titre si il est le plus grand par rapport aux Strings de lines
         // car les spacer ne sont pas forcément retourné dans la méthode getCenteredText() qui est utilisé plus tard dans cette méthode
-        String[] tableauTemp = addToTable(lines, " " + title + " ");
+        String[] tableauTemp = addOnBottomOfTable(lines, " " + title + " ");
 
         // + 2 pour avoir au moins 1 spacer de chaque côté du titre
         int maxLength = getMaximumLength(tableauTemp) + 2;
@@ -481,11 +618,31 @@ public class Programme {
 
             // On ajoute le mot si il correspond aux caractéristiques de difficulté
             if (word.length() >= min && word.length() <= max) {
-                result = addToTable(result, word);
+                result = addOnBottomOfTable(result, word);
             }
         }
 
         return result;
+    }
+
+    // Converti la difficulté en String
+    static String convertDifficultyToString(int nbTermes, int minLength, int maxLength) {
+        return nbTermes + "/" + minLength + "/" + maxLength;
+    }
+
+    // Retourne le nombre de termes de la difficulté
+    static int getNbTermesDifficulty(String difficulty) {
+        return Integer.parseInt(difficulty.split("/")[0]);
+    }
+
+    // Retourne le minimum de la longueur des termes de la difficulté
+    static int getMinLengthDifficulty(String difficulty) {
+        return Integer.parseInt(difficulty.split("/")[1]);
+    }
+
+    // Retourne le maximum de la longueur des termes de la difficulté
+    static int getMaxLengthDifficulty(String difficulty) {
+        return Integer.parseInt(difficulty.split("/")[2]);
     }
 
     // Cherche le fichier dans plusieurs dossiers et le lit si il est trouvé
@@ -569,7 +726,7 @@ public class Programme {
             // On concatène le caractère seulement si c'est une lettre
             if (c >= 'a' && c <= 'z') {
                 mot += c;
-                // On traite aussi les 2 caractères spéciaux "æ" et "œ"
+                // On traite les 2 caractères spéciaux "æ" et "œ"
             } else if (c == 'æ') {
                 mot += "ae";
             } else if (c == 'œ') {
@@ -578,7 +735,7 @@ public class Programme {
                 // On ajoute le mot seulement si le mot n'est pas déjà contenu dans le tableau et si ce n'est pas une lettre seule
                 // (exemple: le mot "c" ne sera pas ajouté dans le tableau puisque c'est une lettre seule)
                 if (mot.length() > 1 && !isIncludedInTable(mot, mots)) {
-                    mots = addToTable(mots, mot);
+                    mots = addOnBottomOfTable(mots, mot);
                 }
 
                 // Le dernier caractère du mot a été atteint donc on réinitialise mot pour le prochain mot
@@ -612,21 +769,33 @@ public class Programme {
         return false;
     }
 
-    // Retourne un tableau au contenu identique à celui entré en paramètres mais avec item en plus en dernier index
-    static String[] addToTable(String[] table, String item) {
-        String[] result = enlargeTable(table);
-        result[result.length - 1] = item;
+    // Retourne un tableau au contenu identique à celui entré en paramètres mais avec item en plus en premier index
+    static String[] addOnTopOfTable(String[] table, String item) {
+        String[] result = new String[table.length + 1];
+
+        // On ajoute le premier index
+        result[0] = item;
+
+        // On copie l'ancien tableau dans le nouveau
+        for (int i = table.length; i > 0; i--) {
+            result[i] = table[i - 1];
+        }
+
         return result;
     }
 
-    // Retourne un tableau au contenu identique à celui entré en paramètres mais avec un emplacement vide en dernier index
+    // Retourne un tableau au contenu identique à celui entré en paramètres mais avec item en plus en dernier index
     @SuppressWarnings("ManualArrayToCollectionCopy")
-    static String[] enlargeTable(String[] table) {
+    static String[] addOnBottomOfTable(String[] table, String item) {
         String[] result = new String[table.length + 1];
 
+        // On copie l'ancien tableau dans le nouveau
         for (int i = 0; i < table.length; i++) {
             result[i] = table[i];
         }
+
+        // On ajoute le dernier index
+        result[result.length - 1] = item;
 
         return result;
     }
@@ -644,6 +813,18 @@ public class Programme {
         return max;
     }
 
+    // Retourne le nombre passé en paramètre concaténé avec son suffix
+    // (exemple pour 1 -> 1er ou pour 2 -> 2ème)
+    static String convertIntToFrenchString(int nb) {
+        if (nb > 1) {
+            return nb + "ème";
+        } else if (nb == 1) {
+            return nb + "er";
+        } else {
+            return nb + "";
+        }
+    }
+
     // Met le programme en pause pendant x ms
     static void sleep(int millis) {
         try {
@@ -657,25 +838,5 @@ public class Programme {
     // Source: https://stackoverflow.com/a/363732
     static int generateRandomInt(int min, int max) {
         return min + (int) (Math.random() * (max - min + 1));
-    }
-
-    // Converti la difficulté en String
-    static String convertDifficultyToString(int nbTermes, int minLength, int maxLength) {
-        return nbTermes + "/" + minLength + "/" + maxLength;
-    }
-
-    // Retourne le nombre de termes de la difficulté
-    static int getNbTermesDifficulty(String difficulty) {
-        return Integer.parseInt(difficulty.split("/")[0]);
-    }
-
-    // Retourne le minimum de la longueur des termes de la difficulté
-    static int getMinLengthDifficulty(String difficulty) {
-        return Integer.parseInt(difficulty.split("/")[1]);
-    }
-
-    // Retourne le maximum de la longueur des termes de la difficulté
-    static int getMaxLengthDifficulty(String difficulty) {
-        return Integer.parseInt(difficulty.split("/")[2]);
     }
 }
