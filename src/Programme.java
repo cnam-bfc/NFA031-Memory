@@ -502,6 +502,7 @@ public class Programme {
         showMessage("Statistiques", message);
     }
 
+    // Ajoute les statistiques d'une partie au tableau des satistiques
     static void addStat(String[][] stats, String gameName, String difficulty, String score, String roundFinished, String playerName) {
         stats[0] = addOnBottomOfTable(stats[0], gameName);
         stats[1] = addOnBottomOfTable(stats[1], difficulty);
@@ -510,6 +511,7 @@ public class Programme {
         stats[4] = addOnBottomOfTable(stats[4], playerName);
     }
 
+    // Retourne le tableau initialisé des statistiques
     static String[][] initStats() {
         String[][] stats = new String[5][];
         // Numéro du jeu de la partie
@@ -525,11 +527,13 @@ public class Programme {
         return stats;
     }
 
+    // Retourne si le joueur veut rejouer au même jeu
     static boolean askReplay() {
         int menuCode = showMenu("Rejouer", "Voulez-vous rejouer au même jeu?", "Oui", "Non");
         return menuCode == 1;
     }
 
+    // Retourne si le joueur veut rejouer avec la même difficulté
     static boolean askReplayWithSameDifficulty() {
         int menuCode = showMenu("Rejouer", "Voulez-vous rejouer avec la même difficulté?", "Oui", "Non");
         return menuCode == 1;
@@ -745,7 +749,7 @@ public class Programme {
     static String centerText(String text, char spacer, char separator, int length) {
         String result = "";
 
-        // Longueur du text + 2 pour les 2 separator (qui doivent êtres retourn obligatoirement)
+        // Longueur du text + 2 pour les 2 separator (qui doivent êtres retourne obligatoirement)
         int minimumLength = text.length() + 2;
         if (minimumLength > length) {
             length = minimumLength;
@@ -785,29 +789,27 @@ public class Programme {
     }
 
     // Retourne une liste de nombres pseudo-aléatoire correspondant à la difficulté
-    // Retourne un tableau vide si une exception survient
+    // Retourne un tableau vide si pas assez de nombres peuvent être générés
     static int[] generateRandomInts(int difficultyNbTermes, int difficultyMinLength, int difficultyMaxLength) {
+        // Math.pow(nombre, exposant) retourne nombre puissance exposant
+        int min = (int) (Math.pow(10, difficultyMinLength - 1));// Min: 10^(difficultyMinLength - 1) ; ex: pour 2: 10^(2 - 1) = 10^1 = 10 donc 2 de longueur
+        int max = (int) (Math.pow(10, difficultyMaxLength) - 1);// Max: (10^difficultyMaxLength) - 1 ; ex: pour 5: (10^5) - 1 = 100000 - 1 = 99999 donc 5 de longueur ; Math.pow(); retourne une la valeur maximum de Integer (Integer.MAX_VALUE) quand x puissance y dépasse MAX_VALUE donc cette valeur ne pourra jamais dépasser Integer.MAX_VALUE
+
+        if (max - min < difficultyNbTermes) {
+            // Retourne un tableau vide pour spécifier à la fonction appelante qu'il n'y a pas assez de nombres
+            return new int[0];
+        }
+
         int[] result = new int[difficultyNbTermes];
 
-        // On incrémente cette variable pour éviter que la boucle en dessous fasse une boucle infini
-        int preventInfiniteLoop = 0;
         for (int i = 0; i < difficultyNbTermes; i++) {
-            if (preventInfiniteLoop > 1000) {
-                break;
-            }
+            int randomInt = generateRandomInt(min, max);
 
-            // Math.pow(nombre, exposant) retourne nombre puissance exposant
-            int generatedInt = generateRandomInt(
-                    (int) (Math.pow(10, difficultyMinLength - 1)), // Min: 10^(difficultyMinLength - 1) ; ex: pour 2: 10^(2 - 1) = 10^1 = 10 donc 2 de longueur
-                    (int) (Math.pow(10, difficultyMaxLength)) - 1);// Max: (10^difficultyMaxLength) - 1 ; ex: pour 5: (10^5) - 1 = 100000 - 1 = 99999 donc 5 de longueur ; Math.pow(); retourne une la valeur maximum de Ingerder (Integer.MAX_VALUE) quand la puissance dépasse MAX_VALUE donc cette valeur calculé ne pourra jamais dépasser Interger.MAX_VALUE
-
-            // Si le nomre généré n'est déjà pas dans le tableau on l'ajoute et on reset preventInfiniteLoop
-            if (!isIncludedInTable(generatedInt, result)) {
-                result[i] = generatedInt;
-                preventInfiniteLoop = 0;
-                // Sinon on génère un nombre différent au prochain tour et on incrémente preventInfiniteLoop car c'est ce bout de code qui risque d'entrainer la boucle dans une boucle infini
+            // Si le nombre généré n'est déjà pas dans le tableau on l'ajoute
+            if (!isIncludedInTable(randomInt, result)) {
+                result[i] = randomInt;
+                // Sinon on génère un nombre différent au prochain tour
             } else {
-                preventInfiniteLoop++;
                 i--;
             }
         }
@@ -815,7 +817,7 @@ public class Programme {
         return result;
     }
 
-    // Retourne la liste des mots du texte correspondant à la difficulté
+    // Retourne une liste de mots du texte pseudo-aléatoire correspondant à la difficulté
     static String[] pickRandomWordsFromText(String fileName, int difficultyNbTermes, int difficultyMinLength, int difficultyMaxLength) {
         String[] result = new String[0];
 
@@ -835,7 +837,7 @@ public class Programme {
         return result;
     }
 
-    // Retourne le nom de la difficulté en fonction du multiplicateur de difficulté
+    // Retourne le nom de la difficulté en fonction du multiplicateur de score
     static String getDifficultyName(float difficultyMultiplier) {
         if (difficultyMultiplier < 1.0f) {
             return "Facile";
@@ -848,7 +850,7 @@ public class Programme {
         }
     }
 
-    // Retourne le score final calculé à partir du score, du multiplicateur de score, et un bonus de points si le joueur est arrivé a terminer tous les rounds
+    // Calcule le score final à partir du score, du multiplicateur de score ; Un bonus de points est ajouté si le joueur est arrivé à terminer tous les rounds
     static int calculateScore(float multiplier, int score, int difficultyNbTermes, boolean gameFinished) {
         float result = multiplier * score;
 
@@ -859,7 +861,7 @@ public class Programme {
         return (int) (result);
     }
 
-    // Retourne le calcul du multiplicateur de la difficulté qui pourra ensuite être appliqué au score
+    // Retourne le multiplicateur de la difficulté qui pourra ensuite être appliqué au score
     static float calculateScoreMutiplier(int difficultyMinLength, int difficultyMaxLength) {
         return 1 + (0.15f * (-4 + difficultyMinLength)) + (0.10f * (-7 + difficultyMaxLength));
     }
