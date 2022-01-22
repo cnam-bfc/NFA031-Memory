@@ -400,17 +400,19 @@ public class Programme {
                 for (int j = 0; j < i - 1; j++) {
                     seriesMemorized = addOnBottomOfTable(seriesMemorized, mots[seriesIndex[j]] + " => " + mots[seriesIndex[j] + 1]);
                 }
+                
+                boolean inverse = reverse;
 
                 // Si le jeu est demandé en mode aléatoire on inverse les question et mots ou pas
                 if (random && generateRandomInt(0, 1) == 1) {
-                    reverse = !reverse;
+                    inverse = !inverse;
                 }
 
                 int index = seriesIndex[i - 1];
                 String question;
                 String answer;
 
-                if (reverse) {
+                if (inverse) {
                     question = mots[index + 1];
                     answer = mots[index];
                 } else {
