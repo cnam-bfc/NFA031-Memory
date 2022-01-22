@@ -378,7 +378,7 @@ public class Programme {
             boolean stopGame = false;
 
             String[] seriesToMemorize = new String[0];
-            int[] seriesIndex = new int[mots.length / 2];
+            int[] seriesIndex = new int[0];
 
             // On fait la liste des séries de mots à deviner avec la liste de l'index de chacune de ces séries
             for (int i = 0; i < mots.length; i += 2) {
@@ -393,17 +393,18 @@ public class Programme {
             showMessage(gameName, addOnTopOfTable(addOnTopOfTable(seriesToMemorize, ""), "Séries de mots à mémoriser"));
 
             // Pour chaque round de la partie
-            for (int i = 1; i <= mots.length / 2; i++) {
+            for (int i = 1; i <= difficulty[0]; i++) {
                 String[] seriesMemorized = new String[0];
 
                 // On fait la liste des séries de mots qu'il a déjà correctement restitué
                 for (int j = 0; j < i - 1; j++) {
-                    seriesMemorized = addOnBottomOfTable(seriesMemorized, mots[seriesIndex[j]] + " => " + mots[seriesIndex[j] + 1]);
+                    int index = seriesIndex[j];
+                    seriesMemorized = addOnBottomOfTable(seriesMemorized, mots[index] + " => " + mots[index + 1]);
                 }
-                
+
                 boolean inverse = reverse;
 
-                // Si le jeu est demandé en mode aléatoire on inverse les question et mots ou pas
+                // Si le jeu est demandé en mode aléatoire on inverse les question et mots de façon aléatoire
                 if (random && generateRandomInt(0, 1) == 1) {
                     inverse = !inverse;
                 }
@@ -424,11 +425,11 @@ public class Programme {
                 seriesMemorized = addOnBottomOfTable(seriesMemorized, "Quel est le mot associé à " + question + "?");
 
                 // On stocke ce qu'a répondu l'utilisateur
-                String saisie = askString(gameName + " - Round " + i + "/" + (mots.length / 2), seriesMemorized);
+                String saisie = askString(gameName + " - Round " + i + "/" + difficulty[0], seriesMemorized);
 
                 // Si le mot restitué n'est pas correct, on lui affiche un message et on arrête la partie en cours
                 if (!answer.equalsIgnoreCase(saisie)) {
-                    showMessage(gameName + " - Round " + i + "/" + (mots.length / 2), "Mince...", "", "Vous vous êtes trompé,", "Vous avez tapé \"" + saisie + "\" alors que \"" + answer + "\" était attendu");
+                    showMessage(gameName + " - Round " + i + "/" + difficulty[0], "Mince...", "", "Vous vous êtes trompé,", "Vous avez tapé \"" + saisie + "\" alors que \"" + answer + "\" était attendu");
                     stopGame = true;
                     break;
                     // Sinon on valide ce round
