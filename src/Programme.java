@@ -8,16 +8,10 @@ public class Programme {
     static final int TERMINAL_MINLENGTH = 75;
     static final int TERMINAL_MINHEIGHT = 9;
     static final int TERMINAL_CLEANUP_HEIGHT = 15;
-    static final String[] GAMES_NAMES = {"Série de mots", "Série de nombres", "Liste de paires de mots"};
 
     public static void main(String[] args) {
         // Au lancement du programme on démarre le jeu
         startGame();
-    }
-
-    // TODO Supprimer cette méthode à la fin du développement
-    static void devMessage(String feature) {
-        showMessage("", "En développement...");
     }
 
     // Démarre le jeu
@@ -85,24 +79,8 @@ public class Programme {
                 case 1 ->
                     showGameMenu(stats);
                 // Statistiques selectionné
-                case 2 -> {
-                    int statsMenuCode;
-
-                    do {
-                        statsMenuCode = showMenu("Statistiques", "De quel jeu voulez-vous voir les statistiques?", "Tous", GAMES_NAMES[0], GAMES_NAMES[1], GAMES_NAMES[2], "Retour");
-
-                        switch (statsMenuCode) {
-                            // Tous selectionné
-                            case 1 ->
-                                showStats(stats);
-                            // Un des jeux selectionné
-                            case 2, 3, 4 ->
-                                showStats(stats, GAMES_NAMES[statsMenuCode - 2]);
-                        }
-
-                        // Tant que 5 (retour) n'est pas sélectionné
-                    } while (statsMenuCode != 5);
-                }
+                case 2 ->
+                    showStats(stats);
                 // Quitter selectionné
                 case 3 ->
                     showQuitMenu(stats);
@@ -125,7 +103,7 @@ public class Programme {
         int menuCode;
 
         do {
-            menuCode = showMenu("Choix du jeu", "", GAMES_NAMES[0], GAMES_NAMES[1], GAMES_NAMES[2], "Retour");
+            menuCode = showMenu("Choix du jeu", "", "Série de mots", "Série de nombres", "Paires de mots", "Paires de mots (inversé)", "Paires de mots (aléatoire)", "Retour");
 
             switch (menuCode) {
                 // Série de mots selectionné
@@ -136,16 +114,22 @@ public class Programme {
                     launchSerieDeNombresGame(stats);
                 // Paires de mots selectionné
                 case 3 ->
-                    launchPairesDeMotsGame(stats);
+                    launchPairesDeMotsGame(stats, false, false);
+                // Paires de mots selectionné (paires de mots inversés)
+                case 4 ->
+                    launchPairesDeMotsGame(stats, false, true);
+                // Paires de mots selectionné (paires de mots inversés aléatoirement)
+                case 5 ->
+                    launchPairesDeMotsGame(stats, true, false);
             }
 
             // On affiche le menu tant que retour n'est pas sélectionné
-        } while (menuCode != 4);
+        } while (menuCode != 6);
     }
 
     // Lance le jeu de série de mots
     static void launchSerieDeMotsGame(String[][] stats) {
-        String gameName = GAMES_NAMES[0];
+        String gameName = "Série de mots";
         // difficulty[0] = nbTermes
         // difficulty[1] = minLength
         // difficulty[2] = maxLength
@@ -243,13 +227,18 @@ public class Programme {
             // Si il veut rejouer et qu'il veut une difficulté différente, on lui demande la nouvelle difficulté et on la change
             if (replay && !askReplayWithSameDifficulty()) {
                 difficulty = askDifficulty();
+
+                // Si Retour est sélectionné on arrête le jeu en cours
+                if (difficulty.length == 0) {
+                    return;
+                }
             }
         } while (replay);
     }
 
     // Lance le jeu de série de nombres
     static void launchSerieDeNombresGame(String[][] stats) {
-        String gameName = GAMES_NAMES[1];
+        String gameName = "Série de nombres";
         // difficulty[0] = nbTermes
         // difficulty[1] = minLength
         // difficulty[2] = maxLength
@@ -347,41 +336,133 @@ public class Programme {
             // Si il veut rejouer et qu'il veut une difficulté différente, on lui demande la nouvelle difficulté et on la change
             if (replay && !askReplayWithSameDifficulty()) {
                 difficulty = askDifficulty();
+
+                // Si Retour est sélectionné on arrête le jeu en cours
+                if (difficulty.length == 0) {
+                    return;
+                }
             }
         } while (replay);
     }
 
     // Lance le jeu de paires de mots
-    static void launchPairesDeMotsGame(String[][] stats) {
-        devMessage("Paires de mots");
-    }
+    static void launchPairesDeMotsGame(String[][] stats, boolean random, boolean reverse) {
+        String gameName = "Paires de mots";
+        if (random) {
+            gameName += " (aléatoire)";
+        } else if (reverse) {
+            gameName += " (inversé)";
+        }
+        // difficulty[0] = nbTermes
+        // difficulty[1] = minLength
+        // difficulty[2] = maxLength
+        int[] difficulty = askDifficulty();
 
-    // Affiche les statistiques d'un jeu en particulié
-    static void showStats(String[][] stats, String gameName) {
-
-        //TODO REWORK THIS TO MATCH SUJET
-        String[] message = new String[0];
-
-        int gameNameLength = getMaximumLength(addOnBottomOfTable(stats[0], "  Jeux  "));
-        int difficultyLength = getMaximumLength(addOnBottomOfTable(stats[1], "  Difficulté  "));
-        int scoreLength = getMaximumLength(addOnBottomOfTable(stats[2], "  Score  "));
-        int playerNameLength = getMaximumLength(addOnBottomOfTable(stats[3], "  Nom du joueur  "));
-
-        message = addOnBottomOfTable(message, centerText("Jeux", '-', ' ', gameNameLength)
-                + centerText("Difficulté", '-', ' ', difficultyLength)
-                + centerText("Score", '-', ' ', scoreLength)
-                + centerText("Nom du joueur", '-', ' ', playerNameLength));
-
-        for (int i = 0; i < stats[0].length; i++) {
-            if (stats[0][i].equals(gameName)) {
-                message = addOnBottomOfTable(message, centerText(stats[0][i], ' ', ' ', gameNameLength)
-                        + centerText(stats[1][i], ' ', ' ', difficultyLength)
-                        + centerText(stats[2][i], ' ', ' ', scoreLength)
-                        + centerText(stats[3][i], ' ', ' ', playerNameLength));
-            }
+        // Si Retour est sélectionné on arrête le jeu en cours
+        if (difficulty.length == 0) {
+            return;
         }
 
-        showMessage("Statistiques", message);
+        boolean replay;
+        do {
+            // On récupère des mots aléatoires issue du texte Extrait_texte qui correspondent à la difficulté (2x plus car on va former des paires de mots)
+            String[] mots = pickRandomWordsFromText("Extrait_texte", difficulty[0] * 2, difficulty[1], difficulty[2]);
+            // Si il n'y a pas assez de mots on arrête le jeu
+            if (mots.length < difficulty[0]) {
+                showErrorMessage(gameName, "-> Pas assez le mots pour démarrer le jeu");
+                return;
+            }
+
+            int roundFinished = 0;
+            // True si on veut arrêter la partie en cours
+            boolean stopGame = false;
+
+            String[] seriesToMemorize = new String[0];
+            int[] seriesIndex = new int[mots.length / 2];
+
+            // On fait la liste des séries de mots à deviner avec la liste de l'index de chacune de ces séries
+            for (int i = 0; i < mots.length; i += 2) {
+                seriesToMemorize = addOnBottomOfTable(seriesToMemorize, mots[i] + " => " + mots[i + 1]);
+                seriesIndex = addOnBottomOfTable(seriesIndex, i);
+            }
+
+            // On mélange la liste des index des séries pour quelles apparaissent aléatoirement
+            seriesIndex = shuffleTable(seriesIndex);
+
+            // On affiche les séries de mots à deviner à l'utilisateur + un titre sépéré des séries de mots par une ligne vide
+            showMessage(gameName, addOnTopOfTable(addOnTopOfTable(seriesToMemorize, ""), "Séries de mots à mémoriser"));
+
+            // Pour chaque round de la partie
+            for (int i = 1; i <= mots.length / 2; i++) {
+                String[] seriesMemorized = new String[0];
+
+                // On fait la liste des séries de mots qu'il a déjà correctement restitué
+                for (int j = 0; j < i - 1; j++) {
+                    seriesMemorized = addOnBottomOfTable(seriesMemorized, mots[seriesIndex[j]] + " => " + mots[seriesIndex[j] + 1]);
+                }
+
+                // Si le jeu est demandé en mode aléatoire on inverse les question et mots ou pas
+                if (random && generateRandomInt(0, 1) == 1) {
+                    reverse = !reverse;
+                }
+
+                int index = seriesIndex[i - 1];
+                String question;
+                String answer;
+
+                if (reverse) {
+                    question = mots[index + 1];
+                    answer = mots[index];
+                } else {
+                    question = mots[index];
+                    answer = mots[index + 1];
+                }
+
+                // On ajoute une question qui sera afficher à l'utilisateur pour lui demander de restituer la nième série de mots
+                seriesMemorized = addOnBottomOfTable(seriesMemorized, "Quel est le mot associé à " + question + "?");
+
+                // On stocke ce qu'a répondu l'utilisateur
+                String saisie = askString(gameName + " - Round " + i + "/" + (mots.length / 2), seriesMemorized);
+
+                // Si le mot restitué n'est pas correct, on lui affiche un message et on arrête la partie en cours
+                if (!answer.equalsIgnoreCase(saisie)) {
+                    showMessage(gameName + " - Round " + i + "/" + (mots.length / 2), "Mince...", "", "Vous vous êtes trompé,", "Vous avez tapé \"" + saisie + "\" alors que \"" + answer + "\" était attendu");
+                    stopGame = true;
+                    break;
+                    // Sinon on valide ce round
+                } else {
+                    roundFinished++;
+                }
+            }
+
+            // On affiche un message de fécilitation au joueur si il a réussi à terminer tous les rounds
+            if (!stopGame) {
+                showMessage(gameName, "Bravo !", "", "Vous avez terminé la partie sans vous tromper !", "Un bonus de points vous a été attribué !");
+            }
+
+            // On calcule les statistiques de la partie en cours
+            float scoreMultiplier = calculateScoreMutiplier(difficulty[1], difficulty[2]);
+            String difficultyName = getDifficultyName(scoreMultiplier);
+            int finalScore = calculateScore(scoreMultiplier, roundFinished, difficulty[0], !stopGame);
+
+            String pseudo = askString("Statistiques - " + gameName, "Quel est votre pseudo?");
+
+            // On sauvegarde et affiche les stats de la partie en cours
+            addStat(stats, gameName, difficultyName, finalScore + "", pseudo);
+            showMessage("Statistiques - " + gameName, "Joueur", pseudo, "", "Difficulté", difficultyName, "", "Score", finalScore + "", "", "Séries de mots correctement restitués", roundFinished + "");
+
+            // On demande au joueur si il veut rejouer
+            replay = askReplay();
+            // Si il veut rejouer et qu'il veut une difficulté différente, on lui demande la nouvelle difficulté et on la change
+            if (replay && !askReplayWithSameDifficulty()) {
+                difficulty = askDifficulty();
+
+                // Si Retour est sélectionné on arrête le jeu en cours
+                if (difficulty.length == 0) {
+                    return;
+                }
+            }
+        } while (replay);
     }
 
     // Affiche les statistiques de tous les jeux
@@ -693,16 +774,11 @@ public class Programme {
     static int[] generateRandomInts(int difficultyNbTermes, int difficultyMinLength, int difficultyMaxLength) {
         int[] result = new int[difficultyNbTermes];
 
-        try {
-            for (int i = 0; i < difficultyNbTermes; i++) {
-                // Math.pow(nombre, exposant) retourne nombre puissance exposant
-                result[i] = generateRandomInt(
-                        (int) (Math.pow(10, difficultyMinLength - 1)), // Min: 10^(difficultyMinLength - 1) ; ex: pour 2: 10^(2 - 1) = 10^1 = 10 donc 2 de longueur
-                        (int) (Math.pow(10, difficultyMaxLength)) - 1);// Max: (10^difficultyMaxLength) - 1 ; ex: pour 5: (10^5) - 1 = 100000 - 1 = 99999 donc 5 de longueur
-            }
-            // Try catch pour éviter toute erreur inopiné si difficultyMaxLength est trop grand et que ducoup le mettre à la puissance dépasse Integer.MAX_VALUE
-        } catch (Exception e) {
-            return new int[0];
+        for (int i = 0; i < difficultyNbTermes; i++) {
+            // Math.pow(nombre, exposant) retourne nombre puissance exposant
+            result[i] = generateRandomInt(
+                    (int) (Math.pow(10, difficultyMinLength - 1)), // Min: 10^(difficultyMinLength - 1) ; ex: pour 2: 10^(2 - 1) = 10^1 = 10 donc 2 de longueur
+                    (int) (Math.pow(10, difficultyMaxLength)) - 1);// Max: (10^difficultyMaxLength) - 1 ; ex: pour 5: (10^5) - 1 = 100000 - 1 = 99999 donc 5 de longueur ; Math.pow(); retourne une la valeur maximum de Ingerder (Integer.MAX_VALUE) quand la puissance dépasse MAX_VALUE donc cette valeur calculé ne pourra jamais dépasser Interger.MAX_VALUE
         }
 
         return result;
@@ -746,7 +822,7 @@ public class Programme {
         float result = multiplier * score;
 
         if (gameFinished) {
-            result += difficultyNbTermes / 3;
+            result += difficultyNbTermes / 2;
         }
 
         return (int) (result);
@@ -861,6 +937,17 @@ public class Programme {
         return content;
     }
 
+    // Variante de la méthode ci-après avec des nombres au lieu de chaines de caractères
+    static int[] shuffleTable(int[] table) {
+        for (int i = 0; i < table.length; i++) {
+            int j = generateRandomInt(0, table.length - 1);
+            int temp = table[j];
+            table[j] = table[i];
+            table[i] = temp;
+        }
+        return table;
+    }
+
     // Retourne le tableau passé en paramètre mélangé
     static String[] shuffleTable(String[] table) {
         for (int i = 0; i < table.length; i++) {
@@ -895,6 +982,22 @@ public class Programme {
         for (int i = table.length; i > 0; i--) {
             result[i] = table[i - 1];
         }
+
+        return result;
+    }
+
+    // Variante de la méthode ci-après avec des nombres au lieu de chaines de caractères
+    @SuppressWarnings("ManualArrayToCollectionCopy")
+    static int[] addOnBottomOfTable(int[] table, int item) {
+        int[] result = new int[table.length + 1];
+
+        // On copie l'ancien tableau dans le nouveau
+        for (int i = 0; i < table.length; i++) {
+            result[i] = table[i];
+        }
+
+        // On ajoute le dernier index
+        result[result.length - 1] = item;
 
         return result;
     }
