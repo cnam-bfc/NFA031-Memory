@@ -171,11 +171,11 @@ public class Programme {
                     memorizeTitle = "Mots à mémoriser";
                 }
 
-                String[] wordsToMemorize = new String[0];
+                String[] wordsToMemorize = new String[i];
 
                 // On fait la liste des mots à deviner dans l'ordre
                 for (int j = 0; j < i; j++) {
-                    wordsToMemorize = addOnBottomOfTable(wordsToMemorize, mots[j]);
+                    wordsToMemorize[j] = mots[j];
                 }
 
                 // On affiche les mots à deviner à l'utilisateur + un titre sépéré des mots par une ligne vide
@@ -183,15 +183,15 @@ public class Programme {
 
                 // On demande à l'utilisateur de restituer les mots à mémoriser un par un
                 for (int j = 0; j < i; j++) {
-                    String[] wordsMemorized = new String[0];
+                    String[] wordsMemorized = new String[j + 1];
 
                     // On fait la liste des mots qu'il a déjà correctement restitué
                     for (int k = 0; k < j; k++) {
-                        wordsMemorized = addOnBottomOfTable(wordsMemorized, mots[k]);
+                        wordsMemorized[k] = mots[k];
                     }
 
                     // On ajoute une question qui sera afficher à l'utilisateur pour lui demander de restituer le nième mot
-                    wordsMemorized = addOnBottomOfTable(wordsMemorized, "Quel est le " + convertIntToFrenchString(j + 1) + " mot?");
+                    wordsMemorized[wordsMemorized.length - 1] = "Quel est le " + convertIntToFrenchString(j + 1) + " mot?";
 
                     // On stocke ce qu'a répondu l'utilisateur
                     String saisie = askString(gameName + " - Round " + i + "/" + mots.length, wordsMemorized);
@@ -226,7 +226,7 @@ public class Programme {
             String pseudo = askString("Statistiques - " + gameName, "Quel est votre pseudo?");
 
             // On sauvegarde et affiche les stats de la partie en cours
-            addStat(stats, gameName, difficultyName, finalScore + "", pseudo);
+            addStat(stats, gameName, difficultyName, finalScore + "", roundFinished + "", pseudo);
             showMessage("Statistiques - " + gameName, "Joueur", pseudo, "", "Difficulté", difficultyName, "", "Score", finalScore + "", "", "Mots correctement restitués", roundFinished + "");
 
             // On demande au joueur si il veut rejouer
@@ -280,11 +280,11 @@ public class Programme {
                     memorizeTitle = "Nombres à mémoriser";
                 }
 
-                String[] numbersToMemorize = new String[0];
+                String[] numbersToMemorize = new String[i];
 
                 // On fait la liste des nombres à deviner dans l'ordre
                 for (int j = 0; j < i; j++) {
-                    numbersToMemorize = addOnBottomOfTable(numbersToMemorize, nombres[j] + "");
+                    numbersToMemorize[j] = nombres[j] + "";
                 }
 
                 // On affiche les nombres à deviner à l'utilisateur + un titre sépéré des nombres par une ligne vide
@@ -292,15 +292,15 @@ public class Programme {
 
                 // On demande à l'utilisateur de restituer les nombres un par un
                 for (int j = 0; j < i; j++) {
-                    String[] numbersMemorized = new String[0];
+                    String[] numbersMemorized = new String[j + 1];
 
                     // On fait la liste des nombres qu'il a déjà correctement restitué
                     for (int k = 0; k < j; k++) {
-                        numbersMemorized = addOnBottomOfTable(numbersMemorized, nombres[k] + "");
+                        numbersMemorized[k] = nombres[k] + "";
                     }
 
                     // On ajoute une question qui sera afficher à l'utilisateur pour lui demander de restituer le nième nombre
-                    numbersMemorized = addOnBottomOfTable(numbersMemorized, "Quel est le " + convertIntToFrenchString(j + 1) + " nombre?");
+                    numbersMemorized[numbersMemorized.length - 1] = "Quel est le " + convertIntToFrenchString(j + 1) + " nombre?";
 
                     // On stocke ce qu'a répondu l'utilisateur
                     int saisie = askInteger(gameName + " - Round " + i + "/" + nombres.length, numbersMemorized);
@@ -335,7 +335,7 @@ public class Programme {
             String pseudo = askString("Statistiques - " + gameName, "Quel est votre pseudo?");
 
             // On sauvegarde et affiche les stats de la partie en cours
-            addStat(stats, gameName, difficultyName, finalScore + "", pseudo);
+            addStat(stats, gameName, difficultyName, finalScore + "", roundFinished + "", pseudo);
             showMessage("Statistiques - " + gameName, "Joueur", pseudo, "", "Difficulté", difficultyName, "", "Score", finalScore + "", "", "Nombres correctement restitués", roundFinished + "");
 
             // On demande au joueur si il veut rejouer
@@ -384,13 +384,13 @@ public class Programme {
             // True si on veut arrêter la partie en cours
             boolean stopGame = false;
 
-            String[] seriesToMemorize = new String[0];
-            int[] seriesIndex = new int[0];
+            String[] seriesToMemorize = new String[difficulty[0] + 2];
+            int[] seriesIndex = new int[difficulty[0]];
 
             // On fait la liste des séries de mots à deviner avec la liste de l'index de chacune de ces séries
             for (int i = 0; i < mots.length; i += 2) {
-                seriesToMemorize = addOnBottomOfTable(seriesToMemorize, mots[i] + " => " + mots[i + 1]);
-                seriesIndex = addOnBottomOfTable(seriesIndex, i);
+                seriesToMemorize[i / 2] = mots[i] + " => " + mots[i + 1];
+                seriesIndex[i / 2] = i;
             }
 
             // On mélange la liste des index des séries pour quelles apparaissent aléatoirement
@@ -401,12 +401,12 @@ public class Programme {
 
             // Pour chaque round de la partie
             for (int i = 1; i <= difficulty[0]; i++) {
-                String[] seriesMemorized = new String[0];
+                String[] seriesMemorized = new String[i];
 
                 // On fait la liste des séries de mots qu'il a déjà correctement restitué
                 for (int j = 0; j < i - 1; j++) {
                     int index = seriesIndex[j];
-                    seriesMemorized = addOnBottomOfTable(seriesMemorized, mots[index] + " => " + mots[index + 1]);
+                    seriesMemorized[j] = mots[index] + " => " + mots[index + 1];
                 }
 
                 boolean inverse = reverse;
@@ -429,7 +429,7 @@ public class Programme {
                 }
 
                 // On ajoute une question qui sera afficher à l'utilisateur pour lui demander de restituer la nième série de mots
-                seriesMemorized = addOnBottomOfTable(seriesMemorized, "Quel est le mot associé à " + question + "?");
+                seriesMemorized[seriesMemorized.length - 1] = "Quel est le mot associé à " + question + "?";
 
                 // On stocke ce qu'a répondu l'utilisateur
                 String saisie = askString(gameName + " - Round " + i + "/" + difficulty[0], seriesMemorized);
@@ -458,7 +458,7 @@ public class Programme {
             String pseudo = askString("Statistiques - " + gameName, "Quel est votre pseudo?");
 
             // On sauvegarde et affiche les stats de la partie en cours
-            addStat(stats, gameName, difficultyName, finalScore + "", pseudo);
+            addStat(stats, gameName, difficultyName, finalScore + "", roundFinished + "", pseudo);
             showMessage("Statistiques - " + gameName, "Joueur", pseudo, "", "Difficulté", difficultyName, "", "Score", finalScore + "", "", "Séries de mots correctement restitués", roundFinished + "");
 
             // On demande au joueur si il veut rejouer
@@ -482,40 +482,46 @@ public class Programme {
         int gameNameLength = getMaximumLength(addOnBottomOfTable(stats[0], "  Jeux  "));
         int difficultyLength = getMaximumLength(addOnBottomOfTable(stats[1], "  Difficulté  "));
         int scoreLength = getMaximumLength(addOnBottomOfTable(stats[2], "  Score  "));
-        int playerNameLength = getMaximumLength(addOnBottomOfTable(stats[3], "  Nom du joueur  "));
+        int roundFinishedLength = getMaximumLength(addOnBottomOfTable(stats[3], "  Round terminés  "));
+        int playerNameLength = getMaximumLength(addOnBottomOfTable(stats[4], "  Nom du joueur  "));
 
         message = addOnBottomOfTable(message, centerText("Jeux", '-', ' ', gameNameLength)
                 + centerText("Difficulté", '-', ' ', difficultyLength)
                 + centerText("Score", '-', ' ', scoreLength)
+                + centerText("Round terminés", '-', ' ', roundFinishedLength)
                 + centerText("Nom du joueur", '-', ' ', playerNameLength));
 
         for (int i = 0; i < stats[0].length; i++) {
             message = addOnBottomOfTable(message, centerText(stats[0][i], ' ', ' ', gameNameLength)
                     + centerText(stats[1][i], ' ', ' ', difficultyLength)
                     + centerText(stats[2][i], ' ', ' ', scoreLength)
-                    + centerText(stats[3][i], ' ', ' ', playerNameLength));
+                    + centerText(stats[3][i], ' ', ' ', roundFinishedLength)
+                    + centerText(stats[4][i], ' ', ' ', playerNameLength));
         }
 
         showMessage("Statistiques", message);
     }
 
-    static void addStat(String[][] stats, String gameName, String difficulty, String score, String playerName) {
+    static void addStat(String[][] stats, String gameName, String difficulty, String score, String roundFinished, String playerName) {
         stats[0] = addOnBottomOfTable(stats[0], gameName);
         stats[1] = addOnBottomOfTable(stats[1], difficulty);
         stats[2] = addOnBottomOfTable(stats[2], score);
-        stats[3] = addOnBottomOfTable(stats[3], playerName);
+        stats[3] = addOnBottomOfTable(stats[2], roundFinished);
+        stats[4] = addOnBottomOfTable(stats[3], playerName);
     }
 
     static String[][] initStats() {
-        String[][] stats = new String[4][];
+        String[][] stats = new String[5][];
         // Numéro du jeu de la partie
         stats[0] = new String[0];
         // Difficulté de la partie
         stats[1] = new String[0];
         // Score de la partie
         stats[2] = new String[0];
-        // Nom du joueur
+        // Round terminés de la partie
         stats[3] = new String[0];
+        // Nom du joueur
+        stats[4] = new String[0];
         return stats;
     }
 
@@ -566,13 +572,12 @@ public class Programme {
         int item = 0;
         try {
             clearConsole();
-            String[] lines = new String[0];
-            if (!subTitle.equals("")) {
-                lines = addOnBottomOfTable(lines, subTitle);
-            }
+            String[] lines = new String[choices.length];
             for (int i = 0; i < choices.length; i++) {
-                String choice = choices[i];
-                lines = addOnBottomOfTable(lines, i + 1 + ". " + choice);
+                lines[i] = i + 1 + ". " + choices[i];
+            }
+            if (!subTitle.equals("")) {
+                lines = addOnTopOfTable(lines, subTitle);
             }
             showBoundingBoxWithContent(title, lines);
             System.out.print("Choix > ");
@@ -784,11 +789,27 @@ public class Programme {
     static int[] generateRandomInts(int difficultyNbTermes, int difficultyMinLength, int difficultyMaxLength) {
         int[] result = new int[difficultyNbTermes];
 
+        // On incrémente cette variable pour éviter que la boucle en dessous fasse une boucle infini
+        int preventInfiniteLoop = 0;
         for (int i = 0; i < difficultyNbTermes; i++) {
+            if (preventInfiniteLoop > 1000) {
+                break;
+            }
+
             // Math.pow(nombre, exposant) retourne nombre puissance exposant
-            result[i] = generateRandomInt(
+            int generatedInt = generateRandomInt(
                     (int) (Math.pow(10, difficultyMinLength - 1)), // Min: 10^(difficultyMinLength - 1) ; ex: pour 2: 10^(2 - 1) = 10^1 = 10 donc 2 de longueur
                     (int) (Math.pow(10, difficultyMaxLength)) - 1);// Max: (10^difficultyMaxLength) - 1 ; ex: pour 5: (10^5) - 1 = 100000 - 1 = 99999 donc 5 de longueur ; Math.pow(); retourne une la valeur maximum de Ingerder (Integer.MAX_VALUE) quand la puissance dépasse MAX_VALUE donc cette valeur calculé ne pourra jamais dépasser Interger.MAX_VALUE
+
+            // Si le nomre généré n'est déjà pas dans le tableau on l'ajoute et on reset preventInfiniteLoop
+            if (!isIncludedInTable(generatedInt, result)) {
+                result[i] = generatedInt;
+                preventInfiniteLoop = 0;
+                // Sinon on génère un nombre différent au prochain tour et on incrémente preventInfiniteLoop car c'est ce bout de code qui risque d'entrainer la boucle dans une boucle infini
+            } else {
+                preventInfiniteLoop++;
+                i--;
+            }
         }
 
         return result;
@@ -969,6 +990,17 @@ public class Programme {
         return table;
     }
 
+    // Variante de la méthode ci-après avec des entiers et non des chaines de caractères
+    static boolean isIncludedInTable(int search, int[] table) {
+        for (int i : table) {
+            if (i == search) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // Retourne vrai si la chaine de caractères est contenu dans le tableau
     // Retourne faux si elle n'y est pas
     static boolean isIncludedInTable(String search, String[] table) {
@@ -996,24 +1028,7 @@ public class Programme {
         return result;
     }
 
-    // Variante de la méthode ci-après avec des nombres au lieu de chaines de caractères
-    @SuppressWarnings("ManualArrayToCollectionCopy")
-    static int[] addOnBottomOfTable(int[] table, int item) {
-        int[] result = new int[table.length + 1];
-
-        // On copie l'ancien tableau dans le nouveau
-        for (int i = 0; i < table.length; i++) {
-            result[i] = table[i];
-        }
-
-        // On ajoute le dernier index
-        result[result.length - 1] = item;
-
-        return result;
-    }
-
     // Retourne un tableau au contenu identique à celui entré en paramètres mais avec item en plus en dernier index
-    @SuppressWarnings("ManualArrayToCollectionCopy")
     static String[] addOnBottomOfTable(String[] table, String item) {
         String[] result = new String[table.length + 1];
 
