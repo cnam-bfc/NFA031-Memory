@@ -80,7 +80,6 @@ public class Programme {
         do {
             menuCode = showMenu("Menu principal", "", "Jouer", "Statistiques", "Quitter");
 
-            // On effectue l'option selectionné par l'utilisateur 
             switch (menuCode) {
                 // Jouer selectionné
                 case 1 ->
@@ -106,77 +105,76 @@ public class Programme {
                 }
                 // Quitter selectionné
                 case 3 ->
-                    showQuitMessage();
+                    showQuitMenu(stats);
             }
 
             // Tant que 3 (Quitter) n'est pas selectionné
         } while (menuCode != 3);
     }
 
+    // Affiche les statistiques avant de quitter le programme
+    static void showQuitMenu(String[][] stats) {
+        showStats(stats);
+        clearConsole();
+        showBoundingBoxWithContent(GAME_NAME, "À bientôt...");
+    }
+
     // Affiche le menu de sélection des jeux
     static void showGameMenu(String[][] stats) {
-        boolean showAgain = true;
+        // Stocke la valeur de l'option sélectionné dans le menu qui sera affiché à l'utilisateur
+        int menuCode;
 
-        // Affiche le menu tant que Retour n'est pas selectionné
-        while (showAgain) {
-            int menuCode = showMenu("Choix du jeu", "", GAMES_NAMES[0], GAMES_NAMES[1], GAMES_NAMES[2], "Retour");
+        do {
+            menuCode = showMenu("Choix du jeu", "", GAMES_NAMES[0], GAMES_NAMES[1], GAMES_NAMES[2], "Retour");
 
             switch (menuCode) {
                 // Série de mots selectionné
                 case 1 ->
-                    showAgain = !launchSerieDeMotsGame(stats);
+                    launchSerieDeMotsGame(stats);
                 // Série de nombres selectionné
                 case 2 ->
-                    showAgain = !launchSerieDeNombresGame(stats);
+                    launchSerieDeNombresGame(stats);
                 // Paires de mots selectionné
                 case 3 ->
-                    showAgain = !launchPairesDeMotsGame(stats);
-                // Retour selectionné
-                case 4 ->
-                    showAgain = false;
+                    launchPairesDeMotsGame(stats);
             }
-        }
+
+            // On affiche le menu tant que retour n'est pas sélectionné
+        } while (menuCode != 4);
     }
 
     // Lance le jeu de série de mots
-    // Retourne faux si il faut réafficher le menu de sélection des jeux
-    static boolean launchSerieDeMotsGame(String[][] stats) {
+    static void launchSerieDeMotsGame(String[][] stats) {
         String gameName = GAMES_NAMES[0];
-        String difficulty = askDifficulty();
+        // difficulty[0] = nbTermes
+        // difficulty[1] = minLength
+        // difficulty[2] = maxLength
+        int[] difficulty = askDifficulty();
 
-        // Si Retour est sélectionné
-        if (difficulty.equals("")) {
-            // On dit à la fonction appelante que retour à été sélectionné
-            return false;
+        // Si Retour est sélectionné on arrête le jeu en cours
+        if (difficulty.length == 0) {
+            return;
         }
 
         boolean replay;
         do {
-            int nbTermes = getNbTermesDifficulty(difficulty);
             // On récupère des mots aléatoires issue du texte Extrait_texte qui correspondent à la difficulté
-            String[] mots = pickRandomWordsFromText("Extrait_texte", difficulty);
+            String[] mots = pickRandomWordsFromText("Extrait_texte", difficulty[0], difficulty[1], difficulty[2]);
             // Si il n'y a pas assez de mots on arrête le jeu
-            if (mots.length < nbTermes) {
+            if (mots.length < difficulty[0]) {
                 showErrorMessage(gameName, "-> Pas assez le mots pour démarrer le jeu");
-                // On dit à la fonction appelante que "retour" a été sélectionné donc le menu de sélection des jeux va se réafficher
-                return false;
+                return;
             }
 
-            // Score de la partie en cours
-            int score = 0;
+            int roundFinished = 0;
             // True si on veut arrêter la partie en cours
             boolean stopGame = false;
 
             // Pour chaque round de la partie
             for (int i = 1; i <= mots.length; i++) {
-                // Si la partie a demandé a être arrêter, on ne commence pas les prochains rounds
-                if (stopGame) {
-                    break;
-                }
-
                 String memorizeTitle;
                 // Texte différent si on est au premier round et qu'il y a seulement 1 mot à mémoriser
-                if (i == 0) {
+                if (i == 1) {
                     memorizeTitle = "Mot à mémoriser";
                 } else {
                     memorizeTitle = "Mots à mémoriser";
@@ -190,7 +188,7 @@ public class Programme {
                 }
 
                 // On affiche les mots à deviner à l'utilisateur + un titre sépéré des mots par une ligne vide
-                showMessage(gameName, addOnTopOfTable(addOnTopOfTable(wordsToMemorize, ""), memorizeTitle));
+                showMessage(gameName + " - Round " + i + "/" + mots.length, addOnTopOfTable(addOnTopOfTable(wordsToMemorize, ""), memorizeTitle));
 
                 // On demande à l'utilisateur de restituer les mots à mémoriser un par un
                 for (int j = 0; j < i; j++) {
@@ -205,27 +203,40 @@ public class Programme {
                     wordsMemorized = addOnBottomOfTable(wordsMemorized, "Quel est le " + convertIntToFrenchString(j + 1) + " mot?");
 
                     // On stocke ce qu'a répondu l'utilisateur
-                    String saisie = askString(gameName, wordsMemorized);
+                    String saisie = askString(gameName + " - Round " + i + "/" + mots.length, wordsMemorized);
 
-                    // Si le mot restitué n'est pas correct, on arrête la partie en cours
+                    // Si le mot restitué n'est pas correct, on lui affiche un message et on arrête la partie en cours
                     if (!mots[j].equalsIgnoreCase(saisie)) {
+                        showMessage(gameName + " - Round " + i + "/" + mots.length, "Mince...", "", "Vous vous êtes trompé,", "Vous avez tapé \"" + saisie + "\" alors que \"" + mots[j] + "\" était attendu");
                         stopGame = true;
                         break;
                     }
                 }
 
-                // On augmente le score de l'utilisateur
-                score++;
+                // Si la partie a demandé a être arrêter, on ne commence pas les prochains rounds
+                if (stopGame) {
+                    break;
+                    // Sinon on valide ce round
+                } else {
+                    roundFinished++;
+                }
             }
 
-            // On demande le pseudo de l'utilisateur à inscrire dans les statistiques
+            // On affiche un message de fécilitation au joueur si il a réussi à terminer tous les rounds
+            if (!stopGame) {
+                showMessage(gameName, "Bravo !", "", "Vous avez terminé la partie sans vous tromper !", "Un bonus de points vous a été attribué !");
+            }
+
+            // On calcule les statistiques de la partie en cours
+            float scoreMultiplier = calculateScoreMutiplier(difficulty[1], difficulty[2]);
+            String difficultyName = getDifficultyName(scoreMultiplier);
+            int finalScore = calculateScore(scoreMultiplier, roundFinished, difficulty[0], !stopGame);
+
             String pseudo = askString("Statistiques - " + gameName, "Quel est votre pseudo?");
 
-            // On sauvegarde les statistiques de la partie en cours
-            addStat(stats, gameName, difficulty, score + "", pseudo);
-
-            // On affiche les statistiques de la partie terminé au joueur
-            showMessage("Statistiques - " + gameName, "Joueur", pseudo, "", "Difficulté", difficulty, "", "Score", score + "");
+            // On sauvegarde et affiche les stats de la partie en cours
+            addStat(stats, gameName, difficultyName, finalScore + "", pseudo);
+            showMessage("Statistiques - " + gameName, "Joueur", pseudo, "", "Difficulté", difficultyName, "", "Score", finalScore + "", "", "Mots correctement restitués", roundFinished + "");
 
             // On demande au joueur si il veut rejouer
             replay = askReplay();
@@ -234,27 +245,121 @@ public class Programme {
                 difficulty = askDifficulty();
             }
         } while (replay);
-
-        // On dit à la fonction appelante que retour n'a pas été sélectionné
-        return true;
     }
 
     // Lance le jeu de série de nombres
-    // Retourne faux si il faut réafficher le menu de sélection des jeux
-    static boolean launchSerieDeNombresGame(String[][] stats) {
-        devMessage("Série de nombres");
-        return false;
+    static void launchSerieDeNombresGame(String[][] stats) {
+        String gameName = GAMES_NAMES[1];
+        // difficulty[0] = nbTermes
+        // difficulty[1] = minLength
+        // difficulty[2] = maxLength
+        int[] difficulty = askDifficulty();
+
+        // Si Retour est sélectionné on arrête le jeu en cours
+        if (difficulty.length == 0) {
+            return;
+        }
+
+        boolean replay;
+        do {
+            // On récupère des nombres pseudo-aléatoire qui correspondent à la difficulté
+            int[] nombres = generateRandomInts(difficulty[0], difficulty[1], difficulty[2]);
+            // Si il y a eu une erreur à la génération des nombres aléatoire
+            if (nombres.length == 0) {
+                showErrorMessage(gameName, "-> Une erreur est survenue à la génération des nombres aléatoires", "-> Veuillez réessayer avec des longueurs de nombre plus petites");
+                return;
+            }
+
+            int roundFinished = 0;
+            // True si on veut arrêter la partie en cours
+            boolean stopGame = false;
+
+            // Pour chaque round de la partie
+            for (int i = 1; i <= nombres.length; i++) {
+                String memorizeTitle;
+                // Texte différent si on est au premier round et qu'il y a seulement 1 nombre à mémoriser
+                if (i == 1) {
+                    memorizeTitle = "Nombre à mémoriser";
+                } else {
+                    memorizeTitle = "Nombres à mémoriser";
+                }
+
+                String[] numbersToMemorize = new String[0];
+
+                // On fait la liste des nombres à deviner dans l'ordre
+                for (int j = 0; j < i; j++) {
+                    numbersToMemorize = addOnBottomOfTable(numbersToMemorize, nombres[j] + "");
+                }
+
+                // On affiche les nombres à deviner à l'utilisateur + un titre sépéré des nombres par une ligne vide
+                showMessage(gameName + " - Round " + i + "/" + nombres.length, addOnTopOfTable(addOnTopOfTable(numbersToMemorize, ""), memorizeTitle));
+
+                // On demande à l'utilisateur de restituer les nombres un par un
+                for (int j = 0; j < i; j++) {
+                    String[] numbersMemorized = new String[0];
+
+                    // On fait la liste des nombres qu'il a déjà correctement restitué
+                    for (int k = 0; k < j; k++) {
+                        numbersMemorized = addOnBottomOfTable(numbersMemorized, nombres[k] + "");
+                    }
+
+                    // On ajoute une question qui sera afficher à l'utilisateur pour lui demander de restituer le nième nombre
+                    numbersMemorized = addOnBottomOfTable(numbersMemorized, "Quel est le " + convertIntToFrenchString(j + 1) + " nombre?");
+
+                    // On stocke ce qu'a répondu l'utilisateur
+                    int saisie = askInteger(gameName + " - Round " + i + "/" + nombres.length, numbersMemorized);
+
+                    // Si le nombre restitué n'est pas correct, on lui affiche un message et on arrête la partie en cours
+                    if (nombres[j] != saisie) {
+                        showMessage(gameName + " - Round " + i + "/" + nombres.length, "Mince...", "", "Vous vous êtes trompé,", "Vous avez tapé \"" + saisie + "\" alors que \"" + nombres[j] + "\" était attendu");
+                        stopGame = true;
+                        break;
+                    }
+                }
+
+                // Si la partie a demandé a être arrêter, on ne commence pas les prochains rounds
+                if (stopGame) {
+                    break;
+                    // Sinon on valide ce round
+                } else {
+                    roundFinished++;
+                }
+            }
+
+            // On affiche un message de fécilitation au joueur si il a réussi à terminer tous les rounds
+            if (!stopGame) {
+                showMessage(gameName, "Bravo !", "", "Vous avez terminé la partie sans vous tromper !", "Un bonus de points vous a été attribué !");
+            }
+
+            // On calcule les statistiques de la partie en cours
+            float scoreMultiplier = calculateScoreMutiplier(difficulty[1], difficulty[2]);
+            String difficultyName = getDifficultyName(scoreMultiplier);
+            int finalScore = calculateScore(scoreMultiplier, roundFinished, difficulty[0], !stopGame);
+
+            String pseudo = askString("Statistiques - " + gameName, "Quel est votre pseudo?");
+
+            // On sauvegarde et affiche les stats de la partie en cours
+            addStat(stats, gameName, difficultyName, finalScore + "", pseudo);
+            showMessage("Statistiques - " + gameName, "Joueur", pseudo, "", "Difficulté", difficultyName, "", "Score", finalScore + "", "", "Nombres correctement restitués", roundFinished + "");
+
+            // On demande au joueur si il veut rejouer
+            replay = askReplay();
+            // Si il veut rejouer et qu'il veut une difficulté différente, on lui demande la nouvelle difficulté et on la change
+            if (replay && !askReplayWithSameDifficulty()) {
+                difficulty = askDifficulty();
+            }
+        } while (replay);
     }
 
     // Lance le jeu de paires de mots
-    // Retourne faux si il faut réafficher le menu de sélection des jeux
-    static boolean launchPairesDeMotsGame(String[][] stats) {
+    static void launchPairesDeMotsGame(String[][] stats) {
         devMessage("Paires de mots");
-        return false;
     }
 
     // Affiche les statistiques d'un jeu en particulié
     static void showStats(String[][] stats, String gameName) {
+
+        //TODO REWORK THIS TO MATCH SUJET
         String[] message = new String[0];
 
         int gameNameLength = getMaximumLength(addOnBottomOfTable(stats[0], "  Jeux  "));
@@ -335,42 +440,31 @@ public class Programme {
 
     // Retourne la difficulté qui est demandé au joueur
     // Retourne un string vide ("") si retour est selectionné
-    static String askDifficulty() {
-        return askDifficulty(true);
-    }
-
-    // Retourne la difficulté qui est demandé au joueur
-    // Retourne un string vide ("") si retour est selectionné
-    static String askDifficulty(boolean backButton) {
-        int menuCode;
-        if (backButton) {
-            menuCode = showMenu("Difficulté", "", "Facile", "Normal", "Difficile", "Personnalisé", "Retour");
-        } else {
-            menuCode = showMenu("Difficulté", "", "Facile", "Normal", "Difficile", "Personnalisé");
-        }
+    static int[] askDifficulty() {
+        int menuCode = showMenu("Difficulté", "", "Facile", "Normal", "Difficile", "Personnalisé", "Retour");
         switch (menuCode) {
             case 1 -> {
                 // Facile
-                return convertDifficultyToString(10, 3, 5);
+                return createTable(10, 3, 5);
             }
             case 2 -> {
                 // Normal
-                return convertDifficultyToString(20, 4, 7);
+                return createTable(20, 4, 7);
             }
             case 3 -> {
                 // Difficile
-                return convertDifficultyToString(30, 5, 10);
+                return createTable(30, 5, 10);
             }
             case 4 -> {
                 // Personnalisé
                 int nbTermes = askInteger("Difficulté", 1, 100, "Saisissez le nombre de termes désiré");
                 int minLength = askInteger("Difficulté", 1, 10, "Saisissez le minimum de caractères d'un terme");
                 int maxLength = askInteger("Difficulté", minLength, 30, "Saisissez le maximum de caractères d'un terme");
-                return convertDifficultyToString(nbTermes, minLength, maxLength);
+                return createTable(nbTermes, minLength, maxLength);
             }
             default -> {
                 // Retour
-                return "";
+                return new int[0];
             }
         }
     }
@@ -442,12 +536,6 @@ public class Programme {
             showErrorMessage("", "-> Impossible de lire l'entier, veuillez réessayer");
             return askInteger(title, lines);
         }
-    }
-
-    // Affiche un message d'au revoir quand on quitte le programme
-    static void showQuitMessage() {
-        clearConsole();
-        showBoundingBoxWithContent(GAME_NAME, "À bientôt...");
     }
 
     // Affiche un message d'avertissement à l'utilisateur
@@ -600,24 +688,39 @@ public class Programme {
         System.out.flush();
     }
 
-    // Retourne la liste des mots du texte correspondant à la difficulté
-    static String[] pickRandomWordsFromText(String fileName, String difficulty) {
-        String[] result = new String[0];
+    // Retourne une liste de nombres pseudo-aléatoire correspondant à la difficulté
+    // Retourne un tableau vide si une exception survient
+    static int[] generateRandomInts(int difficultyNbTermes, int difficultyMinLength, int difficultyMaxLength) {
+        int[] result = new int[difficultyNbTermes];
 
-        // On récupère les caractéristiques de la difficulté
-        int nbTermes = getNbTermesDifficulty(difficulty);
-        int min = getMinLengthDifficulty(difficulty);
-        int max = getMaxLengthDifficulty(difficulty);
+        try {
+            for (int i = 0; i < difficultyNbTermes; i++) {
+                // Math.pow(nombre, exposant) retourne nombre puissance exposant
+                result[i] = generateRandomInt(
+                        (int) (Math.pow(10, difficultyMinLength - 1)), // Min: 10^(difficultyMinLength - 1) ; ex: pour 2: 10^(2 - 1) = 10^1 = 10 donc 2 de longueur
+                        (int) (Math.pow(10, difficultyMaxLength)) - 1);// Max: (10^difficultyMaxLength) - 1 ; ex: pour 5: (10^5) - 1 = 100000 - 1 = 99999 donc 5 de longueur
+            }
+            // Try catch pour éviter toute erreur inopiné si difficultyMaxLength est trop grand et que ducoup le mettre à la puissance dépasse Integer.MAX_VALUE
+        } catch (Exception e) {
+            return new int[0];
+        }
+
+        return result;
+    }
+
+    // Retourne la liste des mots du texte correspondant à la difficulté
+    static String[] pickRandomWordsFromText(String fileName, int difficultyNbTermes, int difficultyMinLength, int difficultyMaxLength) {
+        String[] result = new String[0];
 
         // On parcours les mots du texte qui on été mélangés et on les ajoute au résultat si ils correspondent à la difficulté
         for (String word : shuffleTable(readText(fileName))) {
             // On arrête d'ajouter des mots si on a assez de mots pour la difficulté choisi
-            if (result.length >= nbTermes) {
+            if (result.length >= difficultyNbTermes) {
                 break;
             }
 
             // On ajoute le mot si il correspond aux caractéristiques de difficulté
-            if (word.length() >= min && word.length() <= max) {
+            if (word.length() >= difficultyMinLength && word.length() <= difficultyMaxLength) {
                 result = addOnBottomOfTable(result, word);
             }
         }
@@ -625,24 +728,33 @@ public class Programme {
         return result;
     }
 
-    // Converti la difficulté en String
-    static String convertDifficultyToString(int nbTermes, int minLength, int maxLength) {
-        return nbTermes + "/" + minLength + "/" + maxLength;
+    // Retourne le nom de la difficulté en fonction du multiplicateur de difficulté
+    static String getDifficultyName(float difficultyMultiplier) {
+        if (difficultyMultiplier < 1.0f) {
+            return "Facile";
+        } else if (difficultyMultiplier < 1.4f) {
+            return "Normal";
+        } else if (difficultyMultiplier < 1.8f) {
+            return "Difficile";
+        } else {
+            return "Extrême";
+        }
     }
 
-    // Retourne le nombre de termes de la difficulté
-    static int getNbTermesDifficulty(String difficulty) {
-        return Integer.parseInt(difficulty.split("/")[0]);
+    // Retourne le score final calculé à partir du score, du multiplicateur de score, et un bonus de points si le joueur est arrivé a terminer tous les rounds
+    static int calculateScore(float multiplier, int score, int difficultyNbTermes, boolean gameFinished) {
+        float result = multiplier * score;
+
+        if (gameFinished) {
+            result += difficultyNbTermes / 3;
+        }
+
+        return (int) (result);
     }
 
-    // Retourne le minimum de la longueur des termes de la difficulté
-    static int getMinLengthDifficulty(String difficulty) {
-        return Integer.parseInt(difficulty.split("/")[1]);
-    }
-
-    // Retourne le maximum de la longueur des termes de la difficulté
-    static int getMaxLengthDifficulty(String difficulty) {
-        return Integer.parseInt(difficulty.split("/")[2]);
+    // Retourne le calcul du multiplicateur de la difficulté qui pourra ensuite être appliqué au score
+    static float calculateScoreMutiplier(int difficultyMinLength, int difficultyMaxLength) {
+        return 1 + (0.15f * (-4 + difficultyMinLength)) + (0.10f * (-7 + difficultyMaxLength));
     }
 
     // Cherche le fichier dans plusieurs dossiers et le lit si il est trouvé
@@ -653,7 +765,7 @@ public class Programme {
         String[] folders = {".\\", ".\\src\\", ".\\textes\\"};
 
         for (String folder : folders) {
-            // Si le fichier existe, on lit le fichier et on retourne les mots du fichier sans doublons, ponctuation, ect...
+            // Si le fichier existe, on lit le fichier et on retourne les mots du fichier sans doublons et sans ponctuation
             if (fileExists(folder + fileName + ".txt")) {
                 return readFile(folder + fileName + ".txt");
             }
@@ -662,7 +774,7 @@ public class Programme {
         return new String[0];
     }
 
-    // Retourne le tableau des mots du fichier texte sans doublons, ni ponctuations, ni de lettres seules
+    // Retourne le tableau des mots du fichier texte sans doublons, ni ponctuations
     // Retourne un tableau de 0 valeurs si une exception est levée
     static String[] readFile(String filePath) {
         try {
@@ -692,8 +804,7 @@ public class Programme {
     }
 
     // Retourne un tableau de mots à partir d'une chaine de caractères
-    // sans doublons, sans ponctuation, sans espaces et sans lettres seules
-    // (exemple pour "c'était", seulement "était" est ajouté dans le tableau)
+    // sans doublons, sans ponctuation et sans espaces
     static String[] convertTextToWords(String text) {
         String[] mots = new String[0];
         // On met le texte en minuscules
@@ -732,9 +843,8 @@ public class Programme {
             } else if (c == 'œ') {
                 mot += "oe";
             } else {
-                // On ajoute le mot seulement si le mot n'est pas déjà contenu dans le tableau et si ce n'est pas une lettre seule
-                // (exemple: le mot "c" ne sera pas ajouté dans le tableau puisque c'est une lettre seule)
-                if (mot.length() > 1 && !isIncludedInTable(mot, mots)) {
+                // On ajoute le mot seulement si mot n'est pas vide et que mot n'est pas déjà contenu dans le tableau
+                if (mot.length() != 0 && !isIncludedInTable(mot, mots)) {
                     mots = addOnBottomOfTable(mots, mot);
                 }
 
@@ -744,6 +854,11 @@ public class Programme {
         }
 
         return mots;
+    }
+
+    // Retourne le tableau de int passé en paramètres (utilisé pour alléger le code)
+    static int[] createTable(int... content) {
+        return content;
     }
 
     // Retourne le tableau passé en paramètre mélangé
