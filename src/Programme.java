@@ -103,7 +103,7 @@ public class Programme {
         int menuCode;
 
         do {
-            menuCode = showMenu("Choix du jeu", "", "Série de mots", "Série de nombres", "Paires de mots", "Paires de mots (inversé)", "Paires de mots (aléatoire)", "Retour");
+            menuCode = showMenu("Choix du jeu", "", "Série de mots", "Série de nombres", "Paires de mots", "Retour");
 
             switch (menuCode) {
                 // Série de mots selectionné
@@ -113,18 +113,25 @@ public class Programme {
                 case 2 ->
                     launchSerieDeNombresGame(stats);
                 // Paires de mots selectionné
-                case 3 ->
-                    launchPairesDeMotsGame(stats, false, false);
-                // Paires de mots selectionné (paires de mots inversés)
-                case 4 ->
-                    launchPairesDeMotsGame(stats, false, true);
-                // Paires de mots selectionné (paires de mots inversés aléatoirement)
-                case 5 ->
-                    launchPairesDeMotsGame(stats, true, false);
+                case 3 -> {
+                    int pairesDeMotsMenuCode = showMenu("Choix du jeu", "", "Mode normal", "Mode inversé", "Mode aléatoire", "Retour");
+
+                    switch (pairesDeMotsMenuCode) {
+                        // Mode normal selectionné
+                        case 1 ->
+                            launchPairesDeMotsGame(stats, false, false);
+                        // Mode inversé selectionné
+                        case 2 ->
+                            launchPairesDeMotsGame(stats, false, true);
+                        // Mode aléatoire selectionné
+                        case 3 ->
+                            launchPairesDeMotsGame(stats, true, false);
+                    }
+                }
             }
 
-            // On affiche le menu tant que retour n'est pas sélectionné
-        } while (menuCode != 6);
+            // On affiche le menu tant que 4 (retour) n'est pas sélectionné
+        } while (menuCode != 4);
     }
 
     // Lance le jeu de série de mots
