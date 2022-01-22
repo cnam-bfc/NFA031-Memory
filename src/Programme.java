@@ -526,15 +526,15 @@ public class Programme {
         switch (menuCode) {
             case 1 -> {
                 // Facile
-                return createTable(10, 3, 5);
+                return createTable(5, 3, 5);
             }
             case 2 -> {
                 // Normal
-                return createTable(20, 4, 7);
+                return createTable(10, 4, 7);
             }
             case 3 -> {
                 // Difficile
-                return createTable(30, 5, 10);
+                return createTable(15, 5, 10);
             }
             case 4 -> {
                 // Personnalisé
