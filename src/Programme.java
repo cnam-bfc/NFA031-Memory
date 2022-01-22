@@ -506,8 +506,8 @@ public class Programme {
         stats[0] = addOnBottomOfTable(stats[0], gameName);
         stats[1] = addOnBottomOfTable(stats[1], difficulty);
         stats[2] = addOnBottomOfTable(stats[2], score);
-        stats[3] = addOnBottomOfTable(stats[2], roundFinished);
-        stats[4] = addOnBottomOfTable(stats[3], playerName);
+        stats[3] = addOnBottomOfTable(stats[3], roundFinished);
+        stats[4] = addOnBottomOfTable(stats[4], playerName);
     }
 
     static String[][] initStats() {
