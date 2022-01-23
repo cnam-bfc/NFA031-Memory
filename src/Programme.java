@@ -4,7 +4,6 @@ import java.io.IOException;
 
 public class Programme {
 
-    static final String GAME_NAME = "Jeux de Mémoire";
     static final int TERMINAL_MINLENGTH = 75;
     static final int TERMINAL_MINHEIGHT = 9;
     static final int TERMINAL_CLEANUP_HEIGHT = 15;
@@ -59,7 +58,7 @@ public class Programme {
             progressBar += "]";
 
             // On affiche l'écran de chargement sans titre (1er argument), avec ce contenu (chaque argument est une ligne)
-            showBoundingBoxWithContent("", GAME_NAME, "", "", "", "Chargement...", "", progressBar);
+            showBoundingBoxWithContent("", "Jeux de Mémoire", "", "", "", "Chargement...", "", progressBar);
 
             // On attend un temps aléatoire entre 0 et speed ms pour séparer les faux écrans de chargement dans le temps
             sleep(generateRandomInt(0, speed));
@@ -94,7 +93,7 @@ public class Programme {
     static void showQuitMenu(String[][] stats) {
         showStats(stats);
         clearConsole();
-        showBoundingBoxWithContent(GAME_NAME, "À bientôt...");
+        showBoundingBoxWithContent("Jeux de Mémoire", "À bientôt...");
     }
 
     // Affiche le menu de sélection des jeux
@@ -262,7 +261,7 @@ public class Programme {
             int[] nombres = generateRandomInts(difficulty[0], difficulty[1], difficulty[2]);
             // Si il y a eu une erreur à la génération des nombres aléatoire
             if (nombres.length == 0) {
-                showErrorMessage(gameName, "-> Une erreur est survenue à la génération des nombres aléatoires", "-> Veuillez réessayer avec des longueurs de nombre plus petites");
+                showErrorMessage(gameName, "-> Une erreur est survenue à la génération des nombres aléatoires", "-> Veuillez réessayer avec des longueurs de nombres différentes");
                 return;
             }
 
@@ -475,31 +474,111 @@ public class Programme {
         } while (replay);
     }
 
-    // Affiche les statistiques de tous les jeux
+    // Affiche les statistiques des jeux
     static void showStats(String[][] stats) {
-        String[] message = new String[0];
+        // On va stocker les statistiques par jeu et difficulté dans ce tableau à 2 dimensions
+        String[][] gamesStats = new String[5][];
+        // On va stocker le nom du jeu
+        gamesStats[0] = new String[0];
+        // On va stocker la difficulté du jeu
+        gamesStats[1] = new String[0];
+        // On va stocker le nombre de parties joués
+        gamesStats[2] = new String[0];
+        // On va stocker le score moyen
+        gamesStats[3] = new String[0];
+        // On va stocker le meilleur score (avec le nom du joueur qui l'a obtenu)
+        gamesStats[4] = new String[0];
 
-        int gameNameLength = getMaximumLength(addOnBottomOfTable(stats[0], "  Jeux  "));
-        int difficultyLength = getMaximumLength(addOnBottomOfTable(stats[1], "  Difficulté  "));
-        int scoreLength = getMaximumLength(addOnBottomOfTable(stats[2], "  Score  "));
-        int roundFinishedLength = getMaximumLength(addOnBottomOfTable(stats[3], "  Round terminés  "));
-        int playerNameLength = getMaximumLength(addOnBottomOfTable(stats[4], "  Nom du joueur  "));
+        // On fait la liste de tous les noms des différents jeux (et sous-jeux)
+        String[] gamesList = {"Série de mots", "Série de nombres", "Paires de mots", "Paires de mots (aléatoire)", "Paires de mots (inversé)"};
+        // On fait la liste des différentes difficultés possible
+        String[] difficultyList = {"Facile", "Normal", "Difficile", "Extrême"};
 
-        message = addOnBottomOfTable(message, centerText("Jeux", '-', ' ', gameNameLength)
-                + centerText("Difficulté", '-', ' ', difficultyLength)
-                + centerText("Score", '-', ' ', scoreLength)
-                + centerText("Round terminés", '-', ' ', roundFinishedLength)
-                + centerText("Nom du joueur", '-', ' ', playerNameLength));
+        // On récupère les statistiques pour chaque jeu et chaque difficulté du jeu
+        for (String game : gamesList) {
+            for (String difficulty : difficultyList) {
+                // On récupère les stats du jeu et de la difficulté
+                String[] gameStats = getStat(stats, game, difficulty);
 
-        for (int i = 0; i < stats[0].length; i++) {
-            message = addOnBottomOfTable(message, centerText(stats[0][i], ' ', ' ', gameNameLength)
-                    + centerText(stats[1][i], ' ', ' ', difficultyLength)
-                    + centerText(stats[2][i], ' ', ' ', scoreLength)
-                    + centerText(stats[3][i], ' ', ' ', roundFinishedLength)
-                    + centerText(stats[4][i], ' ', ' ', playerNameLength));
+                // Si le tableau est vide cela veut dire qu'aucune partie n'a été joué donc on passe aux stats suivantes
+                if (gameStats.length == 0) {
+                    continue;
+                }
+
+                // On ajoute aux stats les stats de ce jeu avec cette difficulté
+                // Nom du jeu
+                gamesStats[0] = addOnBottomOfTable(gamesStats[0], gameStats[0]);
+                // Difficulté
+                gamesStats[1] = addOnBottomOfTable(gamesStats[1], gameStats[1]);
+                // Nombre de paties joués
+                gamesStats[2] = addOnBottomOfTable(gamesStats[2], gameStats[2]);
+                // Score moyen
+                gamesStats[3] = addOnBottomOfTable(gamesStats[3], gameStats[3]);
+                // Meilleur score (+ nom du joueur)
+                gamesStats[4] = addOnBottomOfTable(gamesStats[4], gameStats[4]);
+            }
         }
 
+        // On calcule pour chaque attribut des statistiques quel sera la chaine de caractère la plus longue pour que l'on puisse centrer le texte par la suite
+        int gameNameLength = getMaximumLength(addOnBottomOfTable(gamesStats[0], "  Jeux  "));
+        int difficultyLength = getMaximumLength(addOnBottomOfTable(gamesStats[1], "  Difficulté  "));
+        int gamesPlayedLength = getMaximumLength(addOnBottomOfTable(gamesStats[2], "  Parties joués  "));
+        int scoreAverageLength = getMaximumLength(addOnBottomOfTable(gamesStats[3], "  Score moyen  "));
+        int bestScoreLength = getMaximumLength(addOnBottomOfTable(gamesStats[4], "  Meilleur score  "));
+
+        // On fait le tableau des chaines de caractères qui seront affichés au joueur
+        String[] message = new String[0];
+
+        // On commence par rentrer la première ligne qui contient les titres des attributs
+        message = addOnBottomOfTable(message, centerText("Jeux", '-', ' ', gameNameLength)
+                + centerText("Difficulté", '-', ' ', difficultyLength)
+                + centerText("Parties joués", '-', ' ', gamesPlayedLength)
+                + centerText("Score moyen", '-', ' ', scoreAverageLength)
+                + centerText("Meilleur score", '-', ' ', bestScoreLength));
+
+        // On ajoute chaque attribut de la statistique centré sur la même ligne
+        for (int i = 0; i < gamesStats[0].length; i++) {
+            message = addOnBottomOfTable(message, centerText(gamesStats[0][i], ' ', ' ', gameNameLength)
+                    + centerText(gamesStats[1][i], ' ', ' ', difficultyLength)
+                    + centerText(gamesStats[2][i], ' ', ' ', gamesPlayedLength)
+                    + centerText(gamesStats[3][i], ' ', ' ', scoreAverageLength)
+                    + centerText(gamesStats[4][i], ' ', ' ', bestScoreLength));
+        }
+
+        // Enfin on affiche le tableau des statistique sur la console
         showMessage("Statistiques", message);
+    }
+
+    // Retourne les statistiques d'un jeu avec une difficulté
+    static String[] getStat(String[][] stats, String gameName, String difficulty) {
+        int gamesPlayed = 0;
+        int sumScore = 0;
+        int bestScore = 0;
+        String playerName = "";
+
+        // On regarde dans toutes les statistiques celle qui correspondent au jeu et difficulté passé en paramètre puis on fait la somme des parties jouées, ect...
+        for (int i = 0; i < stats[0].length; i++) {
+            if (stats[0][i].equalsIgnoreCase(gameName) && stats[1][i].equalsIgnoreCase(difficulty)) {
+                int score = Integer.parseInt(stats[2][i]);
+
+                // Si le score est mieux que le meilleur score on le remplace, ainsi que le nom du joueur
+                if (score > bestScore) {
+                    bestScore = score;
+                    playerName = stats[4][i];
+                }
+
+                // On ajoute le score à la somme des scores pour que l'on puisse faire la moyenne des scores
+                sumScore += score;
+                gamesPlayed++;
+            }
+        }
+
+        // Si au moins une partie a été joué on retourne les stats du jeu sinon on retourne un tableau vide
+        if (gamesPlayed != 0) {
+            return createTable(gameName, difficulty, gamesPlayed + "", (sumScore / gamesPlayed) + "", bestScore + " -> " + playerName);
+        } else {
+            return new String[0];
+        }
     }
 
     // Ajoute les statistiques d'une partie au tableau des satistiques
@@ -963,6 +1042,11 @@ public class Programme {
         }
 
         return mots;
+    }
+
+    // Variante de la méthode ci-après, retourne le tableau de chaines de caractères passé en paramètres (utilisé pour alléger le code)
+    static String[] createTable(String... content) {
+        return content;
     }
 
     // Retourne le tableau de int passé en paramètres (utilisé pour alléger le code)
