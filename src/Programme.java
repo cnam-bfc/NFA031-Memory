@@ -490,7 +490,7 @@ public class Programme {
         gamesStats[4] = new String[0];
 
         // On fait la liste de tous les noms des différents jeux (et sous-jeux)
-        String[] gamesList = {"Série de mots", "Série de nombres", "Paires de mots", "Paires de mots (aléatoire)", "Paires de mots (inversé)"};
+        String[] gamesList = {"Série de mots", "Série de nombres", "Paires de mots", "Paires de mots (inversé)", "Paires de mots (aléatoire)"};
         // On fait la liste des différentes difficultés possible
         String[] difficultyList = {"Facile", "Normal", "Difficile", "Extrême"};
 
