@@ -15,9 +15,8 @@ public class Programme {
 
     // Démarre le jeu
     static void startGame() {
-        // TODO Augmenter cette valeur
         // Au lancement du programme on affiche un faux écran de chargement
-        showLoadingScreen(100, 25);
+        showLoadingScreen(500, 25);
 
         // Après on initialise les statistiques
         String[][] stats = initStats();
