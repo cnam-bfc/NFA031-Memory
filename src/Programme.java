@@ -383,7 +383,7 @@ public class Programme {
             // True si on veut arrêter la partie en cours
             boolean stopGame = false;
 
-            String[] seriesToMemorize = new String[difficulty[0] + 2];
+            String[] seriesToMemorize = new String[difficulty[0]];
             int[] seriesIndex = new int[difficulty[0]];
 
             // On fait la liste des séries de mots à deviner avec la liste de l'index de chacune de ces séries
