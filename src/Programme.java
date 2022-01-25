@@ -145,10 +145,18 @@ public class Programme {
             return;
         }
 
+        // On demande à l'utilisateur dans quel texte il veut que les mots soit piochés
+        String textName = askTextName();
+
+        // Si Retour est sélectionné on arrête le jeu en cours
+        if (textName.length() == 0) {
+            return;
+        }
+
         boolean replay;
         do {
             // On récupère des mots aléatoires issue du texte Extrait_texte qui correspondent à la difficulté
-            String[] mots = pickRandomWordsFromText("Extrait_texte", difficulty[0], difficulty[1], difficulty[2]);
+            String[] mots = pickRandomWordsFromText(textName, difficulty[0], difficulty[1], difficulty[2]);
             // Si il n'y a pas assez de mots on arrête le jeu
             if (mots.length < difficulty[0]) {
                 showErrorMessage(gameName, "-> Pas assez le mots pour démarrer le jeu");
@@ -229,13 +237,27 @@ public class Programme {
 
             // On demande au joueur si il veut rejouer
             replay = askReplay();
-            // Si il veut rejouer et qu'il veut une difficulté différente, on lui demande la nouvelle difficulté et on la change
-            if (replay && !askReplayWithSameDifficulty()) {
-                difficulty = askDifficulty();
 
-                // Si Retour est sélectionné on arrête le jeu en cours
-                if (difficulty.length == 0) {
-                    return;
+            // Si il veut rejouer
+            if (replay) {
+                // Si il veut une difficulté différente, on lui demande la nouvelle difficulté et on la change
+                if (!askReplayWithSameDifficulty()) {
+                    difficulty = askDifficulty();
+
+                    // Si Retour est sélectionné on arrête le jeu en cours
+                    if (difficulty.length == 0) {
+                        return;
+                    }
+                }
+
+                // Si il veut un texte différent, on lui demande le nom du nouveau texte et on le change
+                if (!askReplayWithSameText()) {
+                    textName = askTextName();
+
+                    // Si Retour est sélectionné on arrête le jeu en cours
+                    if (textName.length() == 0) {
+                        return;
+                    }
                 }
             }
         } while (replay);
@@ -368,10 +390,18 @@ public class Programme {
             return;
         }
 
+        // On demande à l'utilisateur dans quel texte il veut que les mots soit piochés
+        String textName = askTextName();
+
+        // Si Retour est sélectionné on arrête le jeu en cours
+        if (textName.length() == 0) {
+            return;
+        }
+
         boolean replay;
         do {
             // On récupère des mots aléatoires issue du texte Extrait_texte qui correspondent à la difficulté (2x plus car on va former des paires de mots)
-            String[] mots = pickRandomWordsFromText("Extrait_texte", difficulty[0] * 2, difficulty[1], difficulty[2]);
+            String[] mots = pickRandomWordsFromText(textName, difficulty[0] * 2, difficulty[1], difficulty[2]);
             // Si il n'y a pas assez de mots on arrête le jeu
             if (mots.length < difficulty[0]) {
                 showErrorMessage(gameName, "-> Pas assez le mots pour démarrer le jeu");
@@ -461,13 +491,27 @@ public class Programme {
 
             // On demande au joueur si il veut rejouer
             replay = askReplay();
-            // Si il veut rejouer et qu'il veut une difficulté différente, on lui demande la nouvelle difficulté et on la change
-            if (replay && !askReplayWithSameDifficulty()) {
-                difficulty = askDifficulty();
 
-                // Si Retour est sélectionné on arrête le jeu en cours
-                if (difficulty.length == 0) {
-                    return;
+            // Si il veut rejouer
+            if (replay) {
+                // Si il veut une difficulté différente, on lui demande la nouvelle difficulté et on la change
+                if (!askReplayWithSameDifficulty()) {
+                    difficulty = askDifficulty();
+
+                    // Si Retour est sélectionné on arrête le jeu en cours
+                    if (difficulty.length == 0) {
+                        return;
+                    }
+                }
+
+                // Si il veut un texte différent, on lui demande le nom du nouveau texte et on le change
+                if (!askReplayWithSameText()) {
+                    textName = askTextName();
+
+                    // Si Retour est sélectionné on arrête le jeu en cours
+                    if (textName.length() == 0) {
+                        return;
+                    }
                 }
             }
         } while (replay);
@@ -611,16 +655,41 @@ public class Programme {
         return menuCode == 1;
     }
 
+    // Retourne si le joueur veut rejouer avec le même texte
+    static boolean askReplayWithSameText() {
+        int menuCode = showMenu("Rejouer", "Voulez-vous rejouer avec le même texte?", "Oui", "Non");
+        return menuCode == 1;
+    }
+
     // Retourne si le joueur veut rejouer avec la même difficulté
     static boolean askReplayWithSameDifficulty() {
         int menuCode = showMenu("Rejouer", "Voulez-vous rejouer avec la même difficulté?", "Oui", "Non");
         return menuCode == 1;
     }
 
-    // Retourne la difficulté qui est demandé au joueur
+    // Retourne le nom du texte choisi par le joueur
     // Retourne un string vide ("") si retour est selectionné
+    static String askTextName() {
+        // On fait la liste (statique) des textes
+        String[] textes = {"Français - Bilbo le Hobbit"};
+
+        // On demande au joueur au travers d'un menu quel texte il a choisi
+        int menuCode = showMenu("Texte", "Veuillez choisir un texte", addOnBottomOfTable(textes, "Retour"));
+
+        // Si retour est sélectionné
+        if (menuCode == textes.length + 1) {
+            return "";
+            // Sinon si un texte est sélectionné
+        } else {
+            // On retourne le nom du texte en remplacant les espaces par des tirets du 8
+            return textes[menuCode - 1].replace(' ', '_');
+        }
+    }
+
+    // Retourne la difficulté qui est demandé au joueur
+    // Retourne un tableau vide si retour est selectionné
     static int[] askDifficulty() {
-        int menuCode = showMenu("Difficulté", "", "Facile", "Normal", "Difficile", "Personnalisé", "Retour");
+        int menuCode = showMenu("Difficulté", "Veuillez choisir une difficulté", "Facile", "Normal", "Difficile", "Personnalisé", "Retour");
         switch (menuCode) {
             case 1 -> {
                 // Facile
@@ -658,7 +727,7 @@ public class Programme {
             for (int i = 0; i < choices.length; i++) {
                 lines[i] = i + 1 + ". " + choices[i];
             }
-            if (!subTitle.equals("")) {
+            if (subTitle.length() != 0) {
                 lines = addOnTopOfTable(lines, subTitle);
             }
             showBoundingBoxWithContent(title, lines);
@@ -782,7 +851,7 @@ public class Programme {
         // Première ligne
         System.out.print("/");
         char separator = '-';
-        if (!title.equals("")) {
+        if (title.length() != 0) {
             separator = ' ';
         }
         System.out.print(centerText(title, '-', separator, minLength));
