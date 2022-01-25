@@ -636,7 +636,7 @@ public class Programme {
     // Retourne le tableau initialisé des statistiques
     static String[][] initStats() {
         String[][] stats = new String[5][];
-        // Numéro du jeu de la partie
+        // Nom du jeu de la partie
         stats[0] = new String[0];
         // Difficulté de la partie
         stats[1] = new String[0];
@@ -671,7 +671,7 @@ public class Programme {
     // Retourne un string vide ("") si retour est selectionné
     static String askTextName() {
         // On fait la liste (statique) des textes
-        String[] textes = {"Français - Bilbo le Hobbit"};
+        String[] textes = {"Français - Bilbo le Hobbit", "Anglais - Bilbo the Hobbit"};
 
         // On demande au joueur au travers d'un menu quel texte il a choisi
         int menuCode = showMenu("Texte", "Veuillez choisir un texte", addOnBottomOfTable(textes, "Retour"));
